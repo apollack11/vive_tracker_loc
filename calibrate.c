@@ -382,7 +382,14 @@ int main()
 	while(!SurviveThreadLoaded){ OGUSleep(100); }
 
 	// Run the GUI in the main thread
-	GuiThread(0);	
+	// GuiThread(0);
+
+	// Modifying to run on Raspberry Pi (without GUI)
+	while(1) {
+                char caldesc[256];
+                survive_cal_get_status( ctx, caldesc, sizeof( caldesc ) );
+	}
+
 	printf( "Returned\n" );
 	return 0;
 }
