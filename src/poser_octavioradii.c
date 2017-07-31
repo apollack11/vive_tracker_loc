@@ -108,7 +108,7 @@ static FLT calculateFitnessOld2(SensorAngles *angles, FLT *radii, PointPair *pai
 	FLT fitness = 0;
 	for (size_t i = 0; i < numPairs; i++)
 	{
-		// These are the vectors that represent the direction for the two points.  
+		// These are the vectors that represent the direction for the two points.
 		// TODO: optimize by precomputing the tangent.
 		FLT v1[3], v2[3], diff[3];
 
@@ -176,7 +176,7 @@ static FLT calculateFitness(SensorAngles *angles, FLT *radii, PointPair *pairs, 
 
 		// now we have a side-angle-side triangle, and we need to find the third side.
 
-		// The Law of Cosines says: a^2 = b^2 + c^2 ? 2bc * cosA, 
+		// The Law of Cosines says: a^2 = b^2 + c^2 ? 2bc * cosA,
 		// where A is the angle opposite side a.
 
 		// Transform this to:
@@ -189,8 +189,8 @@ static FLT calculateFitness(SensorAngles *angles, FLT *radii, PointPair *pairs, 
 
 		FLT angleInDegrees = angle * 180 / LINMATHPI;
 
-		FLT dist = sqrt( (SQUARED(radii[pairs[i].index1])) + 
-			             (SQUARED(radii[pairs[i].index2])) - 
+		FLT dist = sqrt( (SQUARED(radii[pairs[i].index1])) +
+			             (SQUARED(radii[pairs[i].index2])) -
 			             (	(2 * radii[pairs[i].index1] * radii[pairs[i].index2]) *
 							(FLT_COS(angle))));
 
@@ -306,10 +306,10 @@ static RefineEstimateUsingGradientDescentRadii(FLT *estimateOut, SensorAngles *a
 
 		// remember that gradient descent has a tendency to zig-zag when it encounters a narrow valley?
 		// Well, solving the lighthouse problem presents a very narrow valley, and the zig-zag of a basic
-		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging 
-		// converging gradient descent makes.  Instead of using the gradient as the best indicator of 
+		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging
+		// converging gradient descent makes.  Instead of using the gradient as the best indicator of
 		// the direction we should follow, we're looking at one side of the zig-zag pattern, and specifically
-		// following *that* vector.  As it turns out, this works *amazingly* well.  
+		// following *that* vector.  As it turns out, this works *amazingly* well.
 
 		FLT specialGradient[MAX_RADII];
 		for (size_t i = 0; i < numRadii; i++)
@@ -387,7 +387,7 @@ static RefineEstimateUsingGradientDescentRadii(FLT *estimateOut, SensorAngles *a
 
 
 	}
-	printf(" i=%d ", i);
+	printf(" i=%d\n", i);
 }
 
 static void SolveForLighthouseRadii(Point *objPosition, FLT *objOrientation, TrackedObject *obj)
@@ -400,10 +400,10 @@ static void SolveForLighthouseRadii(Point *objPosition, FLT *objOrientation, Tra
 	}
 
 
-	//for (int i=0; i < obj->numSensors; i++)
-	//{
-	//	printf("%d, ", obj->sensor[i].id);
-	//}
+	for (int i=0; i < obj->numSensors; i++)
+	{
+		printf("%d, ", obj->sensor[i].id);
+	}
 
 	SensorAngles angles[MAX_RADII];
 	PointPair pairs[MAX_POINT_PAIRS];
@@ -434,11 +434,31 @@ static void SolveForLighthouseRadii(Point *objPosition, FLT *objOrientation, Tra
 
 	// we should now have an estimate of the radii.
 
-	//for (int i = 0; i < obj->numSensors; i++)
-	for (int i = 0; i < 1; i++)
+	// for (int i = 0; i < 1; i++)
+	Point sensorLocations[obj->numSensors]; // don't need this yet
+	Point locationSum = { 0, 0, 0 };
+	for (int i = 0; i < obj->numSensors; i++)
 	{
-		printf("radius[%d]: %f\n", i, estimate[i]);
+		FLT r = estimate[i];
+		FLT theta = obj->sensor[i].theta;
+		FLT phi = obj->sensor[i].phi;
+		// printf("radius[%d]: %f\n", i, r);
+		FLT y = r * FLT_SIN(phi) * FLT_COS(theta);
+		FLT z = r * FLT_SIN(phi) * FLT_SIN(theta);
+		FLT x = r * FLT_COS(phi);
+		// printf("position[%d]: (%f, %f, %f)\n", i, x, y, z);
+		// printf("sensor[%d] point: (%f, %f, %f)\n", obj->sensor[i].id, obj->sensor[i].point.x, obj->sensor[i].point.y, obj->sensor[i].point.z);
+		printf(" adjusted position[%d]: (%f, %f, %f)\n", i, x - obj->sensor[i].point.x, y - obj->sensor[i].point.y, z);
+		// printf("sensor[%d] normal: (%f, %f, %f)\n", obj->sensor[i].id, obj->sensor[i].normal.x, obj->sensor[i].normal.y, obj->sensor[i].normal.z);
+		printf("\thorizontal angle[%d]: %f\n", i, theta - LINMATHPI / 2);
+		printf("\tvertical angle[%d]: %f\n", i, phi - LINMATHPI / 2);
+		locationSum.x += x - obj->sensor[i].point.x;
+		locationSum.y += y - obj->sensor[i].point.y;
+		locationSum.z += z;
 	}
+
+	Point averageLocation = { locationSum.x / obj->numSensors, locationSum.y / obj->numSensors, locationSum.z / obj-> numSensors };
+	printf("AVERAGE LOCATION: (%f, %f, %f)\n", averageLocation.x, averageLocation.y, averageLocation.z);
 
 	// (FLT *estimateOut, SensorAngles *angles, FLT *initialEstimate, size_t numRadii, PointPair *pairs, size_t numPairs, FILE *logFile)
 
@@ -456,14 +476,14 @@ static void QuickPose(SurviveObject *so)
 	//	FLT y0=td->oldAngles[i][1][0][td->angleIndex[0][1]];
 	//	//FLT x1=td->oldAngles[i][0][1][td->angleIndex[1][0]];
 	//	//FLT y1=td->oldAngles[i][1][1][td->angleIndex[1][1]];
-	//	//printf("%2d: %8.8f, %8.8f   %8.8f, %8.8f   \n", 
+	//	//printf("%2d: %8.8f, %8.8f   %8.8f, %8.8f   \n",
 	//	//	i,
 	//	//	x0,
 	//	//	y0,
 	//	//	x1,
 	//	//	y1
 	//	//	);
-	//	printf("%2d: %8.8f, %8.8f   \n", 
+	//	printf("%2d: %8.8f, %8.8f   \n",
 	//		i,
 	//		x0,
 	//		y0
@@ -486,8 +506,8 @@ static void QuickPose(SurviveObject *so)
 			int angleIndex0 = (td->angleIndex[lh][0] + 1 + OLD_ANGLES_BUFF_LEN) % OLD_ANGLES_BUFF_LEN;
 			int angleIndex1 = (td->angleIndex[lh][1] + 1 + OLD_ANGLES_BUFF_LEN) % OLD_ANGLES_BUFF_LEN;
 			if ((td->oldAngles[i][0][lh][angleIndex0] != 0 && td->oldAngles[i][1][lh][angleIndex1] != 0))
-				
-				
+
+
 			{
 				if (td->hitCount[i][lh][0] > 10 && td->hitCount[i][lh][1] > 10)
 				{
@@ -506,7 +526,7 @@ static void QuickPose(SurviveObject *so)
 
 
 
-					//printf("%2d: %8.8f, %8.8f   \n", 
+					//printf("%2d: %8.8f, %8.8f   \n",
 					//	i,
 					//	to->sensor[sensorCount].theta,
 					//	to->sensor[sensorCount].phi
@@ -526,7 +546,7 @@ static void QuickPose(SurviveObject *so)
 			SolveForLighthouseRadii(pos, orient, to);
 		}
 
-		
+
 	}
 
 
@@ -553,7 +573,7 @@ int PoserOctavioRadii( SurviveObject * so, PoserData * pd )
 	case POSERDATA_IMU:
 	{
 		PoserDataIMU * imu = (PoserDataIMU*)pd;
-		//printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] );
+		// printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] );
 		break;
 	}
 	case POSERDATA_LIGHT:
@@ -718,4 +738,3 @@ int PoserOctavioRadii( SurviveObject * so, PoserData * pd )
 
 
 REGISTER_LINKTIME( PoserOctavioRadii );
-

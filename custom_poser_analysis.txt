@@ -92,3 +92,4 @@ static Point SolveForLighthouse( FLT posOut[3], FLT quatOut[4], TrackedObject *o
 -- receives TrackedObject and SurviveObject from QuickPose
 -- also receives empty pos and quat FLTs and lh number
 -- puts PoserData into ToriData (from SurviveObject)
+-- iterates through pairs of points and finds the angle between each pair
