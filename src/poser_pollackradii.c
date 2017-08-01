@@ -5,6 +5,22 @@
 #include <string.h>
 #include <stdint.h>
 #include <math.h>
+#include <dclapack.h>
+
+// static void MUL2(FLT A, FLT B, FLT C, int n, int m, int p) {
+//     int i,j,k;
+//     for (i=0; i<n; i++) {
+//         for (j=0; j<p; j++) {
+//             C[i][j] = 0.0f;
+//             for (k=0; k<m; k++) {
+// 								printf("C[%d][%d]: \n", i, j);
+// 								printf("A[%d][%d]: \n", i, k);
+// 								printf("B[%d][%d]: \n", k, j);
+// 								// C[i][j] += A[i][k] * B[k][j];
+//             }
+//         }
+//     }
+// }
 
 // QUESTION: what do I still need from this?
 typedef struct
@@ -14,6 +30,11 @@ typedef struct
 	int angleIndex[NUM_LIGHTHOUSES][2]; // index into circular buffer ahead. separate index for each axis.
 	int lastAxis[NUM_LIGHTHOUSES];
 } PollackRadiiData;
+
+#define MAX_POINT_PAIRS 100
+
+// defining SQUARED as a function
+#define SQUARED(x) ((x)*(x))
 
 typedef struct
 {
@@ -40,12 +61,16 @@ typedef struct
 } TrackedObject;
 
 // used to store pairs of sensors
+// and the angle and distance between them
 typedef struct
 {
-	unsigned char index1;
-	unsigned char index2;
-	FLT KnownDistance;
-} PointPair;
+	Point a;
+	Point b;
+	FLT alpha;
+	FLT distance;
+	char ai;
+	char bi;
+} PointsAndAngle;
 
 // calculate distance between two points
 // used for to calculate distance between sensors
@@ -57,7 +82,144 @@ static FLT distance(Point a, Point b)
 	return FLT_SQRT(x*x + y*y + z*z);
 }
 
+// finds the angle between two sensors on the tracker
+// QUESTION: is this correct???
+FLT angleBetweenSensorPair(TrackedSensor *a, TrackedSensor *b)
+{
+	FLT angle = FLT_ACOS(FLT_COS(a->phi - b->phi)*FLT_COS(a->theta - b->theta));
 
+	// This was from tanay's -- it includes the COS() around the angle
+	// I don't think this works...
+	// FLT angle = FLT_SIN(a->phi)*FLT_COS(a->theta)*FLT_SIN(b->phi)*FLT_COS(b->theta) + FLT_SIN(a->phi)*FLT_SIN(a->theta)*FLT_SIN(b->phi)*FLT_SIN(b->theta) + FLT_COS(a->phi)*FLT_COS(b->phi);
+
+	return angle;
+}
+
+
+
+static void SolveForRadii(FLT *objPosition, FLT *objOrientation, TrackedObject *to)
+{
+	PointsAndAngle pna[MAX_POINT_PAIRS];
+
+	size_t pnaCount = 0;
+	for (unsigned int i = 0; i < to->numSensors; i++)
+	{
+		for (unsigned int j = 0; j < i; j++)
+		{
+			pna[pnaCount].a = to->sensor[i].point;
+			pna[pnaCount].b = to->sensor[j].point;
+
+			pna[pnaCount].alpha = angleBetweenSensorPair(&to->sensor[i], &to->sensor[j]);
+			pna[pnaCount].distance = distance(pna[pnaCount].a, pna[pnaCount].b);
+			pna[pnaCount].ai = i;
+			pna[pnaCount].bi = j;
+
+			pnaCount++;
+		}
+	}
+
+	printf("pnaCount: %zd\n", pnaCount);
+	for (unsigned int i = 0; i < pnaCount; i++)
+	{
+		printf("pna[%d]: alpha = %f, distance = %f\n", i, pna[i].alpha, pna[i].distance);
+	}
+
+	Matrix3x3 jacobian;
+	Matrix3x3 inverseJacobian;
+	FLT f[3][1];
+	FLT grad[3][1] = {100, 100, 100};
+	FLT R[3] = {50, 51, 52};
+	FLT AB = pna[0].distance;
+	FLT BC = pna[1].distance;
+	FLT AC = pna[2].distance;
+	FLT alphaAB = pna[0].alpha;
+	FLT alphaBC = pna[1].alpha;
+	FLT alphaAC = pna[2].alpha;
+
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		printf("grad[%d] = %f\n", i, grad[i][0]);
+	}
+
+	FLT epsilon = 0.3;
+
+	int iterations = 0;
+
+	printf("\nENTERING WHILE LOOP\n");
+
+	// while (grad[1][0] > 0.1 || grad[2][0] > 0.1 || grad[3][0] > 0.1) {
+	while (iterations < 2)
+	{
+		jacobian.val[0][0] = 2*R[0] - 2*R[1] * FLT_COS(alphaAB);
+		jacobian.val[0][1] = 2*R[1] - 2*R[0] * FLT_COS(alphaAB);
+		jacobian.val[0][2] = 0;
+
+		jacobian.val[1][0] = 0;
+		jacobian.val[1][1] = 2*R[1] - 2*R[2] * FLT_COS(alphaBC);
+		jacobian.val[1][2] = 2*R[2] - 2*R[1] * FLT_COS(alphaBC);
+
+		jacobian.val[2][0] = 2*R[0] - 2*R[2] * FLT_COS(alphaAC);
+		jacobian.val[2][1] = 0;
+		jacobian.val[2][2] = 2*R[2] - 2*R[0] * FLT_COS(alphaAC);
+
+		PRINT(jacobian.val, 3, 3);
+
+		inverseJacobian = inverseM33(jacobian);
+
+		f[0][0] = SQUARED(R[0]) + SQUARED(R[1]) - 2*R[0]*R[1]*FLT_COS(alphaAB) - SQUARED(AB);
+		f[1][0] = SQUARED(R[1]) + SQUARED(R[2]) - 2*R[1]*R[2]*FLT_COS(alphaBC) - SQUARED(BC);
+		f[2][0] = SQUARED(R[0]) + SQUARED(R[2]) - 2*R[0]*R[2]*FLT_COS(alphaAC) - SQUARED(AC);
+
+		MUL(jacobian.val, f, grad, 3, 3, 1);
+
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			printf("f[%d] = %f\n", i, f[i][0]);
+		}
+
+		for (unsigned int i = 0; i < 3; i++)
+		{
+			printf("grad[%d] = %f\n", i, grad[i][0]);
+		}
+
+		R[0] -= _ABS(grad[0][0]);
+		R[1] -= _ABS(grad[1][0]);
+		R[2] -= _ABS(grad[2][0]);
+
+		printf("Ra: %f\n", R[0]);
+		printf("Rb: %f\n", R[1]);
+		printf("Rc: %f\n", R[2]);
+
+		iterations++;
+	}
+
+	printf("total iterations: %d\n", iterations);
+
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			printf("jacobian[%d][%d] = %f\n", i, j, jacobian.val[i][j]);
+		}
+	}
+
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		for (unsigned int j = 0; j < 3; j++)
+		{
+			printf("inverseJacobian[%d][%d] = %f\n", i, j, inverseJacobian.val[i][j]);
+		}
+	}
+
+	for (unsigned int i = 0; i < 3; i++)
+	{
+		printf("grad[%d] = %f\n", i, grad[i][0]);
+	}
+
+	printf("newRa: %f\n", R[0]);
+	printf("newRb: %f\n", R[1]);
+	printf("newRc: %f\n", R[2]);
+}
 
 
 
@@ -104,9 +266,10 @@ static void QuickPose(SurviveObject *so)
 			to->sensor[sensorCount].point.x = point[0];
 			to->sensor[sensorCount].point.y = point[1];
 			to->sensor[sensorCount].point.z = point[2];
-			to->sensor[sensorCount].theta = prd->oldAngles[i][0][lh][angleIndex0] + LINMATHPI / 2; // lighthouse 0, angle 0 (horizontal)
-			to->sensor[sensorCount].phi = prd->oldAngles[i][1][lh][angleIndex1] + LINMATHPI / 2; // lighthouse 0, angle 1 (vertical)
+			to->sensor[sensorCount].theta = prd->oldAngles[i][0][lh][angleIndex0]; // lighthouse 0, angle 0 (horizontal)
+			to->sensor[sensorCount].phi = prd->oldAngles[i][1][lh][angleIndex1]; // lighthouse 0, angle 1 (vertical)
 
+			// FOR DEBUGGING ANGLES
 			printf("sensor[%d] theta: %f\n", sensorCount, to->sensor[sensorCount].theta);
 			printf("sensor[%d] phi: %f\n", sensorCount, to->sensor[sensorCount].phi);
 
@@ -117,14 +280,19 @@ static void QuickPose(SurviveObject *so)
 	// store this in the TrackedObject
 	to->numSensors = sensorCount;
 
-	printf("sensorCount: %d\n", to->numSensors);
+	// good to check number of sensors being seen
+	printf("sensorCount: %zd\n", to->numSensors);
 
-	// if (sensorCount > 4)
-	// {
-	// 	FLT pos[3];
-	// 	FLT orient[4];
-	// 	SolveForLighthouseRadii(pos, orient, to);
-	// }
+	if (to->numSensors == 3)
+	{
+		FLT pos[3];
+		FLT orient[4];
+		SolveForRadii(pos, orient, to);
+	}
+	else
+	{
+		printf("WRONG AMOUNT OF SENSORS (%zd)\n", to->numSensors);
+	}
 
 	free(to);
 }
