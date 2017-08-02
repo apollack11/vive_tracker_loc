@@ -34,7 +34,7 @@ GRAPHICS_LOFI:=redist/CNFGFunctions.o redist/CNFGXDriver.o
 endif
 
 
-POSERS:=src/poser_dummy.o src/poser_daveortho.o src/poser_charlesslow.o src/poser_octavioradii.o src/poser_turveytori.o
+POSERS:=src/poser_dummy.o src/poser_daveortho.o src/poser_charlesslow.o src/poser_octavioradii.o src/poser_turveytori.o src/poser_pollackradii.o src/poser_pollackpnp.o
 REDISTS:=redist/json_helpers.o redist/linmath.o redist/jsmn.o redist/os_generic.o
 ifeq ($(UNAME), Darwin)
 REDISTS:=$(REDISTS) redist/hid-osx.c
