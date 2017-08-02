@@ -520,17 +520,17 @@ static void QuickPose(SurviveObject *so)
 					to->sensor[sensorCount].point.x = point[0];
 					to->sensor[sensorCount].point.y = point[1];
 					to->sensor[sensorCount].point.z = point[2];
-					to->sensor[sensorCount].theta = td->oldAngles[i][0][lh][angleIndex0] + LINMATHPI / 2; // lighthouse 0, angle 0 (horizontal)
-					to->sensor[sensorCount].phi = td->oldAngles[i][1][lh][angleIndex1] + LINMATHPI / 2; // lighthouse 0, angle 1 (vertical)
+					to->sensor[sensorCount].theta = td->oldAngles[i][0][lh][angleIndex0]; // lighthouse 0, angle 0 (horizontal)
+					to->sensor[sensorCount].phi = td->oldAngles[i][1][lh][angleIndex1]; // lighthouse 0, angle 1 (vertical)
 					to->sensor[sensorCount].id=i;
 
 
 
-					//printf("%2d: %8.8f, %8.8f   \n",
-					//	i,
-					//	to->sensor[sensorCount].theta,
-					//	to->sensor[sensorCount].phi
-					//	);
+					// printf("%2d: %8.8f, %8.8f   \n",
+					// 	i,
+					// 	to->sensor[sensorCount].theta,
+					// 	to->sensor[sensorCount].phi
+					// 	);
 
 					sensorCount++;
 				}

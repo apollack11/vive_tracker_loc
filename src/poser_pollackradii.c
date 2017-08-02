@@ -7,21 +7,6 @@
 #include <math.h>
 #include <dclapack.h>
 
-// static void MUL2(FLT A, FLT B, FLT C, int n, int m, int p) {
-//     int i,j,k;
-//     for (i=0; i<n; i++) {
-//         for (j=0; j<p; j++) {
-//             C[i][j] = 0.0f;
-//             for (k=0; k<m; k++) {
-// 								printf("C[%d][%d]: \n", i, j);
-// 								printf("A[%d][%d]: \n", i, k);
-// 								printf("B[%d][%d]: \n", k, j);
-// 								// C[i][j] += A[i][k] * B[k][j];
-//             }
-//         }
-//     }
-// }
-
 // QUESTION: what do I still need from this?
 typedef struct
 {
@@ -72,6 +57,32 @@ typedef struct
 	char bi;
 } PointsAndAngle;
 
+void inverseMatrix3by3(Matrix3x3 m, Matrix3x3 result)
+{
+	FLT det = m.val[0][0] * (m.val[1][1]*m.val[2][2] - m.val[2][1]*m.val[1][2]) \
+	 				- m.val[0][1] * (m.val[1][0]*m.val[2][2] - m.val[1][2]*m.val[2][0]) \
+					+ m.val[0][2] * (m.val[1][0]*m.val[2][1] - m.val[1][1]*m.val[2][0]);
+
+	if (det == 0)
+	{
+		printf("ERROR: Determinant of the matrix is 0\n");
+		return;
+	}
+	FLT invdet = 1 / det;
+
+	result.val[0][0] = (m.val[1][1]*m.val[2][2] - m.val[2][1]*m.val[1][2]) * invdet;
+	result.val[0][1] = (m.val[0][2]*m.val[2][1] - m.val[0][1]*m.val[2][2]) * invdet;
+	result.val[0][2] = (m.val[0][1]*m.val[1][2] - m.val[0][2]*m.val[1][1]) * invdet;
+	result.val[1][0] = (m.val[1][2]*m.val[2][0] - m.val[1][0]*m.val[2][2]) * invdet;
+	result.val[1][1] = (m.val[0][0]*m.val[2][2] - m.val[0][2]*m.val[2][0]) * invdet;
+	result.val[1][2] = (m.val[1][0]*m.val[0][2] - m.val[0][0]*m.val[1][2]) * invdet;
+	result.val[2][0] = (m.val[1][0]*m.val[2][1] - m.val[2][0]*m.val[1][1]) * invdet;
+	result.val[2][1] = (m.val[2][0]*m.val[0][1] - m.val[0][0]*m.val[2][1]) * invdet;
+	result.val[2][2] = (m.val[0][0]*m.val[1][1] - m.val[1][0]*m.val[0][1]) * invdet;
+
+	PRINT(result.val, 3, 3);
+}
+
 // calculate distance between two points
 // used for to calculate distance between sensors
 static FLT distance(Point a, Point b)
@@ -83,7 +94,7 @@ static FLT distance(Point a, Point b)
 }
 
 // finds the angle between two sensors on the tracker
-// QUESTION: is this correct???
+// QUESTION: is this correct??? pretty sure it is
 FLT angleBetweenSensorPair(TrackedSensor *a, TrackedSensor *b)
 {
 	FLT angle = FLT_ACOS(FLT_COS(a->phi - b->phi)*FLT_COS(a->theta - b->theta));
@@ -129,26 +140,18 @@ static void SolveForRadii(FLT *objPosition, FLT *objOrientation, TrackedObject *
 	FLT f[3][1];
 	FLT grad[3][1] = {100, 100, 100};
 	FLT R[3] = {50, 51, 52};
-	FLT AB = pna[0].distance;
+	FLT AB = pna[0].distance; // distances are accurate (measured with calipers)
 	FLT BC = pna[1].distance;
 	FLT AC = pna[2].distance;
-	FLT alphaAB = pna[0].alpha;
+	FLT alphaAB = pna[0].alpha; // angles are accurate (measured and calculated)
 	FLT alphaBC = pna[1].alpha;
 	FLT alphaAC = pna[2].alpha;
 
-	for (unsigned int i = 0; i < 3; i++)
-	{
-		printf("grad[%d] = %f\n", i, grad[i][0]);
-	}
-
-	FLT epsilon = 0.3;
-
 	int iterations = 0;
 
-	printf("\nENTERING WHILE LOOP\n");
+	printf("ENTERING WHILE LOOP\n");
 
-	// while (grad[1][0] > 0.1 || grad[2][0] > 0.1 || grad[3][0] > 0.1) {
-	while (iterations < 2)
+	while (grad[1][0] > 0.01 || grad[2][0] > 0.01 || grad[3][0] > 0.01)
 	{
 		jacobian.val[0][0] = 2*R[0] - 2*R[1] * FLT_COS(alphaAB);
 		jacobian.val[0][1] = 2*R[1] - 2*R[0] * FLT_COS(alphaAB);
@@ -162,33 +165,17 @@ static void SolveForRadii(FLT *objPosition, FLT *objOrientation, TrackedObject *
 		jacobian.val[2][1] = 0;
 		jacobian.val[2][2] = 2*R[2] - 2*R[0] * FLT_COS(alphaAC);
 
-		PRINT(jacobian.val, 3, 3);
-
-		inverseJacobian = inverseM33(jacobian);
+		INV(jacobian.val, inverseJacobian.val, 3);
 
 		f[0][0] = SQUARED(R[0]) + SQUARED(R[1]) - 2*R[0]*R[1]*FLT_COS(alphaAB) - SQUARED(AB);
 		f[1][0] = SQUARED(R[1]) + SQUARED(R[2]) - 2*R[1]*R[2]*FLT_COS(alphaBC) - SQUARED(BC);
 		f[2][0] = SQUARED(R[0]) + SQUARED(R[2]) - 2*R[0]*R[2]*FLT_COS(alphaAC) - SQUARED(AC);
 
-		MUL(jacobian.val, f, grad, 3, 3, 1);
+		MUL(inverseJacobian.val, f, grad, 3, 3, 1);
 
-		for (unsigned int i = 0; i < 3; i++)
-		{
-			printf("f[%d] = %f\n", i, f[i][0]);
-		}
-
-		for (unsigned int i = 0; i < 3; i++)
-		{
-			printf("grad[%d] = %f\n", i, grad[i][0]);
-		}
-
-		R[0] -= _ABS(grad[0][0]);
-		R[1] -= _ABS(grad[1][0]);
-		R[2] -= _ABS(grad[2][0]);
-
-		printf("Ra: %f\n", R[0]);
-		printf("Rb: %f\n", R[1]);
-		printf("Rc: %f\n", R[2]);
+		R[0] -= grad[0][0];
+		R[1] -= grad[1][0];
+		R[2] -= grad[2][0];
 
 		iterations++;
 	}
@@ -197,28 +184,32 @@ static void SolveForRadii(FLT *objPosition, FLT *objOrientation, TrackedObject *
 
 	for (unsigned int i = 0; i < 3; i++)
 	{
-		for (unsigned int j = 0; j < 3; j++)
-		{
-			printf("jacobian[%d][%d] = %f\n", i, j, jacobian.val[i][j]);
-		}
-	}
-
-	for (unsigned int i = 0; i < 3; i++)
-	{
-		for (unsigned int j = 0; j < 3; j++)
-		{
-			printf("inverseJacobian[%d][%d] = %f\n", i, j, inverseJacobian.val[i][j]);
-		}
-	}
-
-	for (unsigned int i = 0; i < 3; i++)
-	{
 		printf("grad[%d] = %f\n", i, grad[i][0]);
 	}
 
-	printf("newRa: %f\n", R[0]);
-	printf("newRb: %f\n", R[1]);
-	printf("newRc: %f\n", R[2]);
+	printf("Ra: %f\n", R[0]);
+	printf("Rb: %f\n", R[1]);
+	printf("Rc: %f\n", R[2]);
+
+	FLT avgX = 0;
+	FLT avgY = 0;
+	FLT avgZ = 0;
+	for (int i = 0; i < to->numSensors; i++)
+	{
+		FLT x = R[i]*FLT_SIN(to->sensor[i].phi)*FLT_COS(to->sensor[i].theta) - to->sensor[i].point.x;
+		FLT y = R[i]*FLT_SIN(to->sensor[i].phi)*FLT_SIN(to->sensor[i].theta) - to->sensor[i].point.y;
+		FLT z = R[i]*FLT_COS(to->sensor[i].phi);
+		printf("location[%d]: (%f, %f, %f)\n", i, x, y, z);
+		avgX += x;
+		avgY += y;
+		avgZ += z;
+	}
+	avgX /= 3;
+	avgY /= 3;
+	avgZ /= 3;
+
+	printf("Average Location: (%f, %f, %f)\n\n", avgX, avgY, avgZ);
+
 }
 
 
@@ -228,6 +219,12 @@ static void QuickPose(SurviveObject *so)
 {
 	// get the poser data from SurviveObject
 	PollackRadiiData * prd = so->PoserData;
+
+	// if (! so->ctx->bsd[0].OOTXSet)
+	// {
+	// 	// we don't know where we are!  Augh!!!
+	// 	return;
+	// }
 
 	TrackedObject * to;
 

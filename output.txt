@@ -1,0 +1,16 @@
+
+Initially:
+angle[lh=0][axis=0] = -0.028463
+angle[lh=0][axis=0] = -0.014404
+angle[lh=0][axis=0] = -0.015826
+angle[lh=0][axis=1] = 0.007940
+angle[lh=0][axis=1] = 0.005309
+angle[lh=0][axis=1] = -0.017373
+
+After ~5 seconds:
+angle[lh=0][axis=0] = -0.001077
+angle[lh=0][axis=0] = 0.012950
+angle[lh=0][axis=0] = 0.011544
+angle[lh=0][axis=1] = 0.053495
+angle[lh=0][axis=1] = 0.050872
+angle[lh=0][axis=1] = 0.028174

@@ -1,7 +1,7 @@
-"DefaultPoser":"PoserPollackRadii",
+"DefaultPoser":"PoserPollackPnP",
 "RequiredTrackersForCal":"",
 "AllowAllTrackersForCal":"1",
-"ConfigPoser":"PoserPollackRadii"
+"ConfigPoser":"PoserPollackPnP"
 "lighthouse0":{
 "index":"0",
 "id":"-1578306019",
@@ -14,11 +14,11 @@
 }
 "lighthouse1":{
 "index":"1",
-"id":"-1578306019",
+"id":"-501402641",
 "pose":["0.000000","0.000000","0.000000","0.000000","0.000000","0.000000","0.000000"],
-"fcalphase":["0.027252","0.045563"],
-"fcaltilt":["-0.005936","-0.002949"],
-"fcalcurve":["0.000645","0.001334"],
-"fcalgibpha":["1.915039","-0.668945"],
-"fcalgibmag":["0.007099","-0.007275"]
+"fcalphase":["0.049713","0.014870"],
+"fcaltilt":["-0.003735","0.010750"],
+"fcalcurve":["0.002815","-0.008667"],
+"fcalgibpha":["2.179688","1.125000"],
+"fcalgibmag":["0.005573","-0.008636"]
 }

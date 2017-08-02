@@ -1,0 +1,2 @@
+Compile a c file with OpenCV:
+gcc opencv.c -o opencv `pkg-config --libs --cflags opencv` -ldl -lm

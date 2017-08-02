@@ -220,11 +220,11 @@ void estimateToroidalAndPoloidalAngleOfPoint(
 	// now we'll undo the rotation part.
 	pointF = RotateAndTranslatePoint(pointF, rot, origin);
 
-	// hooray, now pointF is in our more-friendly coordinate system.  
+	// hooray, now pointF is in our more-friendly coordinate system.
 
-	// Now, it's time to figure out the toroidal angle to that point.  This should be pretty easy. 
-	// We will "flatten" the z dimension to only look at the x and y values.  Then, we just need to measure the 
-	// angle between a vector to pointF and a vector along the x axis.  
+	// Now, it's time to figure out the toroidal angle to that point.  This should be pretty easy.
+	// We will "flatten" the z dimension to only look at the x and y values.  Then, we just need to measure the
+	// angle between a vector to pointF and a vector along the x axis.
 
 	FLT toroidalHyp = FLT_SQRT(SQUARED(pointF.y) + SQUARED(pointF.x));
 
@@ -250,12 +250,12 @@ void estimateToroidalAndPoloidalAngleOfPoint(
 	// figure out the poloidal angle.  We should rotate the entire torus by the toroidal angle
 	// so that the point we're focusin on will lie on the x/z plane.  We then should translate the
 	// torus so that the center of the poloidal circle is at the origin.  At that point, it will
-	// be trivial to determine the poloidal angle-- it will be the angle on the xz plane of a 
+	// be trivial to determine the poloidal angle-- it will be the angle on the xz plane of a
 	// vector from the origin to the point.
 
 	// okay, instead of rotating the torus & point by the toroidal angle to get the point on
 	// the xz plane, we're going to take advantage of the radial symmetry of the torus
-	// (i.e. it's symmetric about the point we'd want to rotate it, so the rotation wouldn't 
+	// (i.e. it's symmetric about the point we'd want to rotate it, so the rotation wouldn't
 	// change the torus at all).  Therefore, we'll leave the torus as is, but we'll rotate the point
 	// This will only impact the x and y coordinates, and we'll use "G" as the postfix to represent
 	// this new coordinate system
@@ -275,8 +275,8 @@ void estimateToroidalAndPoloidalAngleOfPoint(
 	double toroidalRadius = distanceBetweenPoints / (2 * pna->tanAngle);
 	double poloidalRadius = sqrt(SQUARED(toroidalRadius) + SQUARED(distanceBetweenPoints / 2));
 
-	// The center of the polidal circle already lies on the z axis at this point, so we won't shift z at all. 
-	// The shift along the X axis will be the toroidal radius.  
+	// The center of the polidal circle already lies on the z axis at this point, so we won't shift z at all.
+	// The shift along the X axis will be the toroidal radius.
 
 	Point pointH;
 	pointH.z = pointG.z;
@@ -371,7 +371,7 @@ FLT getPointFitnessForPna(Point pointIn, PointsAndAngle *pna)
 
 	FLT dist = distance(pointIn, torusPoint);
 
-	// This is some voodoo black magic.  This is here to solve the problem that the origin 
+	// This is some voodoo black magic.  This is here to solve the problem that the origin
 	// (which is near the center of all the tori) erroniously will rank as a good match.
 	// through a lot of empiracle testing on how to compensate for this, the "fudge factor"
 	// below ended up being the best fit.  As simple as it is, I have a strong suspicion
@@ -489,7 +489,7 @@ Point getAvgPoints(Point a, Point b)
 
 
 // This is modifies the basic gradient descent algorithm to better handle the shallow valley case,
-// which appears to be typical of this convergence.  
+// which appears to be typical of this convergence.
 static Point RefineEstimateUsingModifiedGradientDescent1(Point initialEstimate, PointsAndAngle *pna, size_t pnaCount, FILE *logFile)
 {
 	int i = 0;
@@ -532,10 +532,10 @@ static Point RefineEstimateUsingModifiedGradientDescent1(Point initialEstimate, 
 
 		// remember that gradient descent has a tendency to zig-zag when it encounters a narrow valley?
 		// Well, solving the lighthouse problem presents a very narrow valley, and the zig-zag of a basic
-		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging 
-		// converging gradient descent makes.  Instead of using the gradient as the best indicator of 
+		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging
+		// converging gradient descent makes.  Instead of using the gradient as the best indicator of
 		// the direction we should follow, we're looking at one side of the zig-zag pattern, and specifically
-		// following *that* vector.  As it turns out, this works *amazingly* well.  
+		// following *that* vector.  As it turns out, this works *amazingly* well.
 
 		Point specialGradient = { .x = point3.x - point1.x,.y = point3.y - point1.y,.z = point3.y - point1.y };
 
@@ -578,7 +578,7 @@ static Point RefineEstimateUsingModifiedGradientDescent1(Point initialEstimate, 
 		// So, even though we could still improve, we're likely to be improving
 		// very slowly, and we should just take what we've got and move on.
 		// This also seems to happen almost only when data is a little more "dirty"
-		// because the tracker is being rotated.  
+		// because the tracker is being rotated.
 		if (i > 120)
 		{
 			//printf("i got big");
@@ -641,7 +641,7 @@ FLT RotationEstimateFitnessOld(Point lhPoint, FLT *quaternion, TrackedObject *ob
 
 		// now the we've got the location of the sensor in the lighthouses's reference frame, given lhPoint and quaternion inputs.
 
-		// We need an arbitrary vector from the plane to the point.  
+		// We need an arbitrary vector from the plane to the point.
 		// Since the plane goes through the origin, this is trivial.
 		// The sensor point itself is such a vector!
 
@@ -650,7 +650,7 @@ FLT RotationEstimateFitnessOld(Point lhPoint, FLT *quaternion, TrackedObject *ob
 		FLT dH = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormH));
 		FLT dV = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormV));
 
-		
+
 		fitness += SQUARED(dH);
 		fitness += SQUARED(dV);
 	}
@@ -673,7 +673,7 @@ FLT RotationEstimateFitnessAxisAngle(Point lh, FLT *AxisAngle, TrackedObject *ob
 	{
 
 
-		
+
 		// let's see... we need to figure out where this sensor should be in the LH reference frame.
 		FLT sensorLocation[3] = {obj->sensor[i].point.x-lh.x, obj->sensor[i].point.y-lh.y, obj->sensor[i].point.z-lh.z};
 
@@ -697,7 +697,7 @@ FLT RotationEstimateFitnessAxisAngle(Point lh, FLT *AxisAngle, TrackedObject *ob
 
 // This figures out how far away from the scanned planes each point is, then does a sum of squares
 // for the fitness.
-// 
+//
 // interesting-- this is one place where we could use any sensors that are only hit by
 // just an x or y axis to make our estimate better.  TODO: bring that data to this fn.
 FLT RotationEstimateFitnessAxisAngleOriginal(Point lhPoint, FLT *quaternion, TrackedObject *obj)
@@ -749,7 +749,7 @@ FLT RotationEstimateFitnessAxisAngleOriginal(Point lhPoint, FLT *quaternion, Tra
 
 		// now the we've got the location of the sensor in the lighthouses's reference frame, given lhPoint and quaternion inputs.
 
-		// We need an arbitrary vector from the plane to the point.  
+		// We need an arbitrary vector from the plane to the point.
 		// Since the plane goes through the origin, this is trivial.
 		// The sensor point itself is such a vector!
 
@@ -758,7 +758,7 @@ FLT RotationEstimateFitnessAxisAngleOriginal(Point lhPoint, FLT *quaternion, Tra
 		FLT dH = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormH));
 		FLT dV = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormV));
 
-		
+
 		fitness += SQUARED(dH);
 		fitness += SQUARED(dV);
 	}
@@ -819,7 +819,7 @@ FLT RotationEstimateFitnessQuaternion(Point lhPoint, FLT *quaternion, TrackedObj
 
 		// now the we've got the location of the sensor in the lighthouses's reference frame, given lhPoint and quaternion inputs.
 
-		// We need an arbitrary vector from the plane to the point.  
+		// We need an arbitrary vector from the plane to the point.
 		// Since the plane goes through the origin, this is trivial.
 		// The sensor point itself is such a vector!
 
@@ -828,7 +828,7 @@ FLT RotationEstimateFitnessQuaternion(Point lhPoint, FLT *quaternion, TrackedObj
 		FLT dH = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormH));
 		FLT dV = FLT_FABS(dot3d(sensor_in_lh_reference_frame, tNormV));
 
-		
+
 		fitness += SQUARED(dH);
 		fitness += SQUARED(dV);
 	}
@@ -907,7 +907,7 @@ static void WhereIsTheTrackedObjectAxisAngle(FLT *posOut, FLT *rotation, Point l
 	posOut[0] = -lhPoint.x;
 	posOut[1] = -lhPoint.y;
 	posOut[2] = -lhPoint.z;
-	
+
 	rotatearoundaxis(posOut, posOut, rotation, rotation[3]);
 
 	printf("{% 04.4f, % 04.4f, % 04.4f}  ", posOut[0], posOut[1], posOut[2]);
@@ -940,7 +940,7 @@ static void RefineRotationEstimateAxisAngle(FLT *rotOut, Point lhPoint, FLT *ini
 		quatcopy(point1, rotOut);
 		// let's get 3 iterations of gradient descent here.
 		FLT gradient1[4];
-		
+
 		normalize3d(point1, point1);
 
 		getRotationGradientAxisAngle(gradient1, lhPoint, point1, obj, g/10000);
@@ -965,10 +965,10 @@ static void RefineRotationEstimateAxisAngle(FLT *rotOut, Point lhPoint, FLT *ini
 
 		// remember that gradient descent has a tendency to zig-zag when it encounters a narrow valley?
 		// Well, solving the lighthouse problem presents a very narrow valley, and the zig-zag of a basic
-		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging 
-		// converging gradient descent makes.  Instead of using the gradient as the best indicator of 
+		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging
+		// converging gradient descent makes.  Instead of using the gradient as the best indicator of
 		// the direction we should follow, we're looking at one side of the zig-zag pattern, and specifically
-		// following *that* vector.  As it turns out, this works *amazingly* well.  
+		// following *that* vector.  As it turns out, this works *amazingly* well.
 
 		FLT specialGradient[4];
 		quatsub(specialGradient,point3,point1);
@@ -1017,7 +1017,7 @@ static void WhereIsTheTrackedObjectQuaternion(FLT *rotation, Point lhPoint)
 {
 	FLT reverseRotation[4] = {rotation[0], rotation[1], rotation[2], -rotation[3]};
 	FLT objPoint[3] = {lhPoint.x, lhPoint.y, lhPoint.z};
-	
+
 	//rotatearoundaxis(objPoint, objPoint, reverseRotation, reverseRotation[3]);
 	quatrotatevector(objPoint, rotation, objPoint);
 	printf("(%f, %f, %f)\n", objPoint[0], objPoint[1], objPoint[2]);
@@ -1052,7 +1052,7 @@ static void RefineRotationEstimateQuaternion(FLT *rotOut, Point lhPoint, FLT *in
 		quatcopy(point1, rotOut);
 		// let's get 3 iterations of gradient descent here.
 		FLT gradient1[4];
-		
+
 		//normalize3d(point1, point1);
 
 		getRotationGradientQuaternion(gradient1, lhPoint, point1, obj, g/10000);
@@ -1077,10 +1077,10 @@ static void RefineRotationEstimateQuaternion(FLT *rotOut, Point lhPoint, FLT *in
 
 		// remember that gradient descent has a tendency to zig-zag when it encounters a narrow valley?
 		// Well, solving the lighthouse problem presents a very narrow valley, and the zig-zag of a basic
-		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging 
-		// converging gradient descent makes.  Instead of using the gradient as the best indicator of 
+		// gradient descent is kinda horrible here.  Instead, think about the shape that a zig-zagging
+		// converging gradient descent makes.  Instead of using the gradient as the best indicator of
 		// the direction we should follow, we're looking at one side of the zig-zag pattern, and specifically
-		// following *that* vector.  As it turns out, this works *amazingly* well.  
+		// following *that* vector.  As it turns out, this works *amazingly* well.
 
 		FLT specialGradient[4];
 		quatsub(specialGradient,point3,point1);
@@ -1127,7 +1127,7 @@ static void RefineRotationEstimateQuaternion(FLT *rotOut, Point lhPoint, FLT *in
 void SolveForRotation(FLT rotOut[4], TrackedObject *obj, Point lh)
 {
 
-	// Step 1, create initial quaternion for guess.  
+	// Step 1, create initial quaternion for guess.
 	// This should have the lighthouse directly facing the tracked object.
 	Point trackedObjRelativeToLh = { .x = -lh.x,.y = -lh.y,.z = -lh.z };
 	FLT theta = atan2(-lh.x, -lh.y);
@@ -1241,7 +1241,7 @@ static Point SolveForLighthouse(FLT posOut[3], FLT quatOut[4], TrackedObject *ob
 
 	// arbitrarily picking a value of 8 meters out to start from.
 	// intentionally picking the direction of the average normal vector of the sensors that see the lighthouse
-	// since this is least likely to pick the incorrect "mirror" point that would send us 
+	// since this is least likely to pick the incorrect "mirror" point that would send us
 	// back into the search for the correct point (see "if (a1 > M_PI / 2)" below)
 	Point p1 = getNormalizedAndScaledVector(avgNorm, 8);
 
@@ -1253,22 +1253,22 @@ static Point SolveForLighthouse(FLT posOut[3], FLT quatOut[4], TrackedObject *ob
 		p1.z = toriData->lastLhPos[lh].z;
 	}
 
-	// refinedEstimateGd is the estimate for the location of the lighthouse in the tracked 
+	// refinedEstimateGd is the estimate for the location of the lighthouse in the tracked
 	// object's local coordinate system.
 	Point refinedEstimateGd = RefineEstimateUsingModifiedGradientDescent1(p1, pna, pnaCount, logFile);
 
 	FLT pf1[3] = { refinedEstimateGd.x, refinedEstimateGd.y, refinedEstimateGd.z };
 
-	// here we're checking the direction of the found point against the average direction of the 
+	// here we're checking the direction of the found point against the average direction of the
 	// normal direction of the sensors that saw the light pulse.
 	// This is because there are two possible points of convergence for the tori.  One is the correct
 	// location of the lighthouse.  The other is in almost exactly the opposite direction.
 	// The easiest way to determine that we've converged correctly is to see if the sensors' normal
 	// are pointing in the direction of the point we've converged on.
-	// if we have converged on the wrong point, we can try to converge one more time, using a starting estimate of 
+	// if we have converged on the wrong point, we can try to converge one more time, using a starting estimate of
 	// the point we converged on rotated to be directly opposite of its current position.  Such a point
 	// is guaranteed, in practice, to converge on the other location.
-	// Note: in practice, we pretty much always converge on the correct point in the first place, 
+	// Note: in practice, we pretty much always converge on the correct point in the first place,
 	// but this check just makes extra sure.
 	FLT a1 = anglebetween3d(pf1, avgNormF);
 	if (a1 > M_PI / 2)
@@ -1301,7 +1301,7 @@ static Point SolveForLighthouse(FLT posOut[3], FLT quatOut[4], TrackedObject *ob
 	// system, find the rotation of the lighthouse, again in the
 	// tracked object's coordinate system.
 	// TODO: I believe this could be radically improved
-	// using an SVD.  
+	// using an SVD.
 	SolveForRotation(rot, obj, refinedEstimateGd);
 	FLT objPos[3];
 
@@ -1329,7 +1329,7 @@ static Point SolveForLighthouse(FLT posOut[3], FLT quatOut[4], TrackedObject *ob
 
 	//if (0 == foo)
 	if (setLhCalibration)
-	{ 
+	{
 		//foo = 1;
 		if (so->ctx->bsd[lh].PositionSet)
 		{
@@ -1366,8 +1366,8 @@ static Point SolveForLighthouse(FLT posOut[3], FLT quatOut[4], TrackedObject *ob
 	wcPos[2] += so->ctx->bsd[lh].Pose.Pos[2];
 
 	FLT newOrientation[4];
-	//quatrotateabout(newOrientation, rotQuat, so->ctx->bsd[lh].Pose.Rot); // turns the wrong way 
-	quatrotateabout(newOrientation, so->ctx->bsd[lh].Pose.Rot, rotQuat); // turns the wrong way 
+	//quatrotateabout(newOrientation, rotQuat, so->ctx->bsd[lh].Pose.Rot); // turns the wrong way
+	quatrotateabout(newOrientation, so->ctx->bsd[lh].Pose.Rot, rotQuat); // turns the wrong way
 
 	FLT invRot[4];
 	quatgetreciprocal(invRot, rotQuat);
@@ -1446,14 +1446,14 @@ static void QuickPose(SurviveObject *so, int lh)
 	//	FLT y0=td->oldAngles[i][1][0][td->angleIndex[0][1]];
 	//	FLT x1=td->oldAngles[i][0][1][td->angleIndex[1][0]];
 	//	FLT y1=td->oldAngles[i][1][1][td->angleIndex[1][1]];
-	//	//printf("%2d: %8.8f, %8.8f   %8.8f, %8.8f   \n", 
+	//	//printf("%2d: %8.8f, %8.8f   %8.8f, %8.8f   \n",
 	//	//	i,
 	//	//	x0,
 	//	//	y0,
 	//	//	x1,
 	//	//	y1
 	//	//	);
-	//	printf("%2d: %8.8f, %8.8f   \n", 
+	//	printf("%2d: %8.8f, %8.8f   \n",
 	//		i,
 	//		x0,
 	//		y0
@@ -1480,7 +1480,7 @@ static void QuickPose(SurviveObject *so, int lh)
 		{
 			int angleIndex0 = (td->angleIndex[lh][0] + 1 + OLD_ANGLES_BUFF_LEN) % OLD_ANGLES_BUFF_LEN;
 			int angleIndex1 = (td->angleIndex[lh][1] + 1 + OLD_ANGLES_BUFF_LEN) % OLD_ANGLES_BUFF_LEN;
-			if (td->oldAngles[i][0][lh][angleIndex0] != 0 && td->oldAngles[i][1][lh][angleIndex1] != 0) 
+			if (td->oldAngles[i][0][lh][angleIndex0] != 0 && td->oldAngles[i][1][lh][angleIndex1] != 0)
 			{
 				FLT norm[3] = { so->sensor_normals[i * 3 + 0] , so->sensor_normals[i * 3 + 1] , so->sensor_normals[i * 3 + 2] };
 				FLT point[3] = { so->sensor_locations[i * 3 + 0] , so->sensor_locations[i * 3 + 1] , so->sensor_locations[i * 3 + 2] };
@@ -1497,6 +1497,12 @@ static void QuickPose(SurviveObject *so, int lh)
 				to->sensor[sensorCount].point.z = point[2];
 				to->sensor[sensorCount].theta = td->oldAngles[i][0][lh][angleIndex0] + LINMATHPI / 2; // lighthouse 0, angle 0 (horizontal)
 				to->sensor[sensorCount].phi = td->oldAngles[i][1][lh][angleIndex1] + LINMATHPI / 2; // lighthouse 0, angle 1 (vertical)
+
+				// printf("%2d: %8.8f, %8.8f   \n",
+				// 	i,
+				// 	to->sensor[sensorCount].theta,
+				// 	to->sensor[sensorCount].phi
+				// 	);
 
 
 				sensorCount++;
@@ -1523,7 +1529,7 @@ static void QuickPose(SurviveObject *so, int lh)
 			//{
 			//	SolveForLighthouse(pos, quat, to, so, 0, lh, 0);
 			//}
-			
+
 
 
 
@@ -1531,7 +1537,7 @@ static void QuickPose(SurviveObject *so, int lh)
 			printf("!\n");
 		}
 
-		
+
 	}
 
 
@@ -1559,7 +1565,7 @@ int PoserTurveyTori( SurviveObject * so, PoserData * poserData )
 	case POSERDATA_IMU:
 	{
 		PoserDataIMU * tmpImu = (PoserDataIMU*)poserData;
-		
+
 		// store off data we can use for figuring out what direction is down when doing calibration.
 		//TODO: looks like the data mask isn't getting set correctly.
 		//if (tmpImu->datamask & 1) // accelerometer data is present
@@ -1688,7 +1694,7 @@ int PoserTurveyTori( SurviveObject * so, PoserData * poserData )
 
 			for (int i = 0; i < so->nr_locations; i++)
 			{
-				if (fs->lengths[i][lh][0] != -1 && fs->lengths[i][lh][1] != -1) 
+				if (fs->lengths[i][lh][0] != -1 && fs->lengths[i][lh][1] != -1)
 				{
 					FLT norm[3] = { so->sensor_normals[i * 3 + 0] , so->sensor_normals[i * 3 + 1] , so->sensor_normals[i * 3 + 2] };
 					FLT point[3] = { so->sensor_locations[i * 3 + 0] , so->sensor_locations[i * 3 + 1] , so->sensor_locations[i * 3 + 2] };
@@ -1750,4 +1756,3 @@ int PoserTurveyTori( SurviveObject * so, PoserData * poserData )
 
 
 REGISTER_LINKTIME( PoserTurveyTori );
-

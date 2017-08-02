@@ -2,9 +2,10 @@ all : lib data_recorder test calibrate calibrate_client
 
 CC:=gcc
 
-CFLAGS:=`pkg-config opencv --cflags` -Iinclude/libsurvive -I. -fPIC -g -O3 -Iredist -flto -DUSE_DOUBLE -std=gnu99 -rdynamic
+
+CFLAGS:=-Iinclude/libsurvive -I. -fPIC -g -O3 -Iredist -flto -DUSE_DOUBLE -std=gnu99 -rdynamic
 #LDFLAGS:=-L/usr/local/lib -lpthread -lusb-1.0 -lz -lm -flto -g
-LDFLAGS:=-L/usr/local/lib -lpthread -lz -lm -flto -g `pkg-config opencv --libs`
+LDFLAGS:=-L/usr/local/lib -lpthread -lz -lm -flto -g
 
 #----------
 # Platform specific changes to CFLAGS/LDFLAGS
@@ -31,7 +32,7 @@ GRAPHICS_LOFI:=redist/CNFGFunctions.o redist/CNFGXDriver.o
 endif
 
 
-POSERS:=src/poser_dummy.o src/poser_daveortho.o src/poser_charlesslow.o src/poser_octavioradii.o src/poser_turveytori.o src/poser_pollackradii.o src/poser_pollackpnp.o
+POSERS:=src/poser_dummy.o src/poser_daveortho.o src/poser_charlesslow.o src/poser_octavioradii.o src/poser_turveytori.o src/poser_pollackradii.o
 REDISTS:=redist/json_helpers.o redist/linmath.o redist/jsmn.o redist/os_generic.o
 ifeq ($(UNAME), Darwin)
 REDISTS:=$(REDISTS) redist/hid-osx.c
