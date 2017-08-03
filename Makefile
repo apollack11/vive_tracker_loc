@@ -63,7 +63,6 @@ LIBSURVIVE_O:=$(POSERS) $(REDISTS) $(LIBSURVIVE_CORE)
 LIBSURVIVE_C:=$(LIBSURVIVE_O:.o=.c)
 
 # unused: redist/crc32.c
-
 testCocoa : testCocoa.c $(DRAWFUNCTIONS)
 	$(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 
@@ -73,7 +72,7 @@ test : test.c ./lib/libsurvive.so redist/os_generic.o
 data_recorder : data_recorder.c ./lib/libsurvive.so redist/os_generic.c $(DRAWFUNCTIONS)
 	$(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 
-calibrate :  calibrate.c ./lib/libsurvive.so redist/os_generic.c $(DRAWFUNCTIONS)
+calibrate :  calibrate.c ./lib/libsurvive.so ./lib/posecalc.so redist/os_generic.c $(DRAWFUNCTIONS)
 	$(CC) -o $@ $^ $(LDFLAGS) $(CFLAGS)
 
 calibrate_client :  calibrate_client.c ./lib/libsurvive.so redist/os_generic.c $(GRAPHICS_LOFI)
@@ -86,7 +85,10 @@ static_calibrate : calibrate.c redist/os_generic.c $(DRAWFUNCTIONS) $(LIBSURVIVE
 lib:
 	mkdir lib
 
-lib/libsurvive.so : $(LIBSURVIVE_O)
+lib/posecalc.so : opencv_pose_calc.cpp
+	g++ -o $@ $^ `pkg-config opencv --cflags --libs` -shared -fPIC
+
+lib/libsurvive.so : $(LIBSURVIVE_O) ./lib/posecalc.so
 	$(CC) -o $@ $^ $(LDFLAGS) -shared
 
 
@@ -94,4 +96,4 @@ calibrate_tcc : $(LIBSURVIVE_C)
 	tcc -DRUNTIME_SYMNUM $(CFLAGS) -o $@ $^ $(LDFLAGS) calibrate.c redist/os_generic.c $(DRAWFUNCTIONS) redist/symbol_enumerator.c
 
 clean :
-	rm -rf *.o src/*.o *~ src/*~ test data_recorder calibrate testCocoa lib/libsurvive.so redist/*.o redist/*~
+	rm -rf *.o src/*.o *~ src/*~ test data_recorder calibrate testCocoa lib/libsurvive.so lib/posecalc.so redist/*.o redist/*~

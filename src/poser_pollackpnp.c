@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <dclapack.h>
+#include "opencv_pose_calc.h"
 
 // QUESTION: what do I still need from this?
 typedef struct
@@ -21,29 +22,29 @@ typedef struct
 // defining SQUARED as a function
 #define SQUARED(x) ((x)*(x))
 
-typedef struct
-{
-	FLT x;
-	FLT y;
-	FLT z;
-} Point;
-
-// used to store info about each sensor
-typedef struct
-{
-	Point point; // location of the sensor on the tracked object;
-	Point normal; // unit vector indicating the normal for the sensor
-	double theta; // "horizontal" angular measurement from lighthouse radians
-	double phi; // "vertical" angular measurement from lighthouse in radians.
-	int id;
-} TrackedSensor;
-
-// used to store info about all the sensors
-typedef struct
-{
-	size_t numSensors;
-	TrackedSensor sensor[0];
-} TrackedObject;
+// typedef struct
+// {
+// 	FLT x;
+// 	FLT y;
+// 	FLT z;
+// } Point;
+//
+// // used to store info about each sensor
+// typedef struct
+// {
+// 	Point point; // location of the sensor on the tracked object;
+// 	Point normal; // unit vector indicating the normal for the sensor
+// 	double theta; // "horizontal" angular measurement from lighthouse radians
+// 	double phi; // "vertical" angular measurement from lighthouse in radians.
+// 	int id;
+// } TrackedSensor;
+//
+// // used to store info about all the sensors
+// typedef struct
+// {
+// 	size_t numSensors;
+// 	TrackedSensor sensor[0];
+// } TrackedObject;
 
 // used to store pairs of sensors
 // and the angle and distance between them
@@ -128,17 +129,17 @@ static void QuickPose(SurviveObject *so)
 		}
 	}
 
-	for (int i = 0; i < sensorCount; i++)
-	{
-		printf("[%f, %f], ", to->sensor[i].theta, to->sensor[i].phi);
-	}
-	printf("\n");
-
-	for (int i = 0; i < sensorCount; i++)
-	{
-		printf("[%f, %f, %f], ", to->sensor[i].point.x, to->sensor[i].point.y, to->sensor[i].point.z);
-	}
-	printf("\n");
+	// for (int i = 0; i < sensorCount; i++)
+	// {
+	// 	printf("[%f, %f], ", to->sensor[i].theta, to->sensor[i].phi);
+	// }
+	// printf("\n");
+	//
+	// for (int i = 0; i < sensorCount; i++)
+	// {
+	// 	printf("[%f, %f, %f], ", to->sensor[i].point.x, to->sensor[i].point.y, to->sensor[i].point.z);
+	// }
+	// printf("\n");
 
 
 	// sensorCount is the number of sensors that did not have an angle of 0
@@ -147,6 +148,11 @@ static void QuickPose(SurviveObject *so)
 
 	// good to check number of sensors being seen
 	printf("sensorCount: %zd\n", to->numSensors);
+
+	if (sensorCount > 4)
+	{
+		PoseCalculation(to);
+	}
 
 	free(to);
 }

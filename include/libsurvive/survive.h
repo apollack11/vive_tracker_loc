@@ -31,7 +31,7 @@ struct SurviveObject
 	//Pose Information, also "poser" field.
 	FLT    PoseConfidence; //0..1
 	SurvivePose OutPose; //Final pose? (some day, one can dream!)
-	SurvivePose FromLHPose[NUM_LIGHTHOUSES]; //Filled out by poser, contains computed position from each lighthouse. 
+	SurvivePose FromLHPose[NUM_LIGHTHOUSES]; //Filled out by poser, contains computed position from each lighthouse.
 	void * PoserData;   //Initialized to zero, configured by poser, can be anything the poser wants.
 	PoserCB PoserFn;
 
@@ -53,7 +53,7 @@ struct SurviveObject
 	//Flood info, for calculating which laser is currently sweeping.
 	void * disambiguator_data;
 	int8_t   oldcode;
-	int8_t   sync_set_number; //0 = master, 1 = slave, -1 = fault. 
+	int8_t   sync_set_number; //0 = master, 1 = slave, -1 = fault.
 	int8_t   did_handle_ootx; //If unset, will send lightcap data for sync pulses next time a sensor is hit.
 	uint32_t last_sync_time[NUM_LIGHTHOUSES];
 	uint32_t last_sync_length[NUM_LIGHTHOUSES];
@@ -141,7 +141,7 @@ void survive_cal_install( SurviveContext * ctx );  //XXX This will be removed if
 // Read back a human-readable string description of the calibration status
 int survive_cal_get_status( struct SurviveContext * ctx, char * description, int description_length );
 
-//Call these from your callback if overridden.  
+//Call these from your callback if overridden.
 //Accept higher-level data.
 void survive_default_light_process( SurviveObject * so, int sensor_id, int acode, int timeinsweep, uint32_t timecode, uint32_t length , uint32_t lh);
 void survive_default_imu_process( SurviveObject * so, int mode, FLT * accelgyro, uint32_t timecode, int id );
@@ -176,7 +176,7 @@ typedef struct
 	uint8_t sensor_id;
 	uint16_t length;
 	uint32_t timestamp;
-} 
+}
 LightcapElement;
 
 
@@ -192,4 +192,3 @@ void handle_lightcap( SurviveObject * so, LightcapElement * le );
 #endif
 
 #endif
-
