@@ -120,27 +120,9 @@ static void QuickPose(SurviveObject *so)
 			to->sensor[sensorCount].theta = ppd->oldAngles[i][0][lh][angleIndex0]; // lighthouse 0, angle 0 (horizontal)
 			to->sensor[sensorCount].phi = ppd->oldAngles[i][1][lh][angleIndex1]; // lighthouse 0, angle 1 (vertical)
 
-			// FOR DEBUGGING ANGLES
-			// printf("np.append(meas,[%f, %f])\n", sensorCount, to->sensor[sensorCount].theta, to->sensor[sensorCount].phi);
-			// // printf("sensor[%d] phi: %f\n", sensorCount, to->sensor[sensorCount].phi);
-			// printf("np.append(body_pts,[%f, %f, %f])\n", sensorCount, to->sensor[sensorCount].point.x, to->sensor[sensorCount].point.y, to->sensor[sensorCount].point.z);
-
 			sensorCount++;
 		}
 	}
-
-	// for (int i = 0; i < sensorCount; i++)
-	// {
-	// 	printf("[%f, %f], ", to->sensor[i].theta, to->sensor[i].phi);
-	// }
-	// printf("\n");
-	//
-	// for (int i = 0; i < sensorCount; i++)
-	// {
-	// 	printf("[%f, %f, %f], ", to->sensor[i].point.x, to->sensor[i].point.y, to->sensor[i].point.z);
-	// }
-	// printf("\n");
-
 
 	// sensorCount is the number of sensors that did not have an angle of 0
 	// store this in the TrackedObject

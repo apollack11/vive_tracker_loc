@@ -2,33 +2,10 @@
 #include <iostream>
 #include <string>
 
-// struct Point
-// {
-// 	float x;
-// 	float y;
-// 	float z;
-// };
-//
-// // used to store info about each sensor
-// struct TrackedSensor
-// {
-// 	Point point; // location of the sensor on the tracked object;
-// 	Point normal; // unit vector indicating the normal for the sensor
-// 	double theta; // "horizontal" angular measurement from lighthouse radians
-// 	double phi; // "vertical" angular measurement from lighthouse in radians.
-// 	int id;
-// };
-//
-// // used to store info about all the sensors
-// struct TrackedObject
-// {
-// 	size_t numSensors;
-// 	TrackedSensor sensor[0];
-// };
-
 std::vector<cv::Point2f> GatherImagePoints(TrackedObject *to);
 std::vector<cv::Point3f> GatherObjectPoints(TrackedObject *to);
-void PopulateTrackedObject(TrackedObject *to);
+bool isRotationMatrix(cv::Mat &R);
+std::vector<cv::Point3f> rotationMatrixToEulerAngles(cv::Mat &R);
 
 void PoseCalculation(TrackedObject *to)
 {
@@ -54,97 +31,16 @@ void PoseCalculation(TrackedObject *to)
   // solvePnP
   cv::solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
 
-  // print output vectors
-  std::cout << "rvec: " << rvec << std::endl;
-  std::cout << "tvec: " << tvec << std::endl;
+  // convert rvec to roation matrix
+  cv::Mat R(3, 1, cv::DataType<double>::type);
+  cv::Rodrigues(rvec, R);
 
-  std::vector<cv::Point2f> projectedPoints;
-  cv::projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs, projectedPoints);
+  // convert rotation matrix to euler angles
+  std::vector<cv::Point3f> angles = rotationMatrixToEulerAngles(R);
 
-  // for(unsigned int i = 0; i < projectedPoints.size(); ++i)
-  // {
-  //   std::cout << "Image point: " << imagePoints[i] << " Projected to " << projectedPoints[i] << std::endl;
-  // }
-
-  // for(unsigned int i = 0; i < projectedPoints.size(); ++i)
-  // {
-  //   std::cout << "Location of point " << i << " is: " << projectedPoints[i] << std::endl;
-  // }
-}
-
-void TestFunction(int val)
-{
-  // printf("Test Value: %d\n", val);
-  std::cout << "Test Value: " << val << std::endl;
-}
-
-
-// int main(int argc, char* argv[])
-// {
-//     // used as a placeholder until I can pass TrackedObject in from Poser
-//     TrackedObject *to = new TrackedObject;
-//     PopulateTrackedObject(to);
-//
-//     PoseCalculation(to);
-// }
-
-// int main( int argc, char* argv[])
-// {
-//   // used as a placeholder until I can pass TrackedObject in from Poser
-//   TrackedObject *to = new TrackedObject;
-//   PopulateTrackedObject(to);
-//
-//   // Converts values from TrackedObject to vectors of imagePoints and objectPoints
-//   std::vector<cv::Point2f> imagePoints = GatherImagePoints(to);
-//   std::vector<cv::Point3f> objectPoints = GatherObjectPoints(to);
-//
-//   // use identity matrix for cameraMatrix
-//   cv::Mat cameraMatrix(3,3,cv::DataType<double>::type);
-//   cv::setIdentity(cameraMatrix);
-//
-//   // make distCoeffs Mat of 4 zeros
-//   cv::Mat distCoeffs(4,1,cv::DataType<double>::type);
-//   distCoeffs.at<double>(0) = 0;
-//   distCoeffs.at<double>(1) = 0;
-//   distCoeffs.at<double>(2) = 0;
-//   distCoeffs.at<double>(3) = 0;
-//
-//   // initialize rvec and tvec
-//   cv::Mat rvec(3,1,cv::DataType<double>::type);
-//   cv::Mat tvec(3,1,cv::DataType<double>::type);
-//
-//   // solvePnP
-//   cv::solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
-//
-//   // print output vectors
-//   std::cout << "rvec: " << rvec << std::endl;
-//   std::cout << "tvec: " << tvec << std::endl;
-//
-//   std::vector<cv::Point2f> projectedPoints;
-//   cv::projectPoints(objectPoints, rvec, tvec, cameraMatrix, distCoeffs, projectedPoints);
-//
-//   for(unsigned int i = 0; i < projectedPoints.size(); ++i)
-//   {
-//     std::cout << "Image point: " << imagePoints[i] << " Projected to " << projectedPoints[i] << std::endl;
-//   }
-//
-//   return 0;
-// }
-
-void PopulateTrackedObject(TrackedObject *to)
-{
-  int sensorCount = 10;
-  // to = malloc(sizeof(TrackedObject) + (sensorCount * sizeof(TrackedSensor)));
-
-  for (int i = 0; i < sensorCount; i++)
-  {
-    to->sensor[i].point.x = rand()/double(RAND_MAX);
-    to->sensor[i].point.y = rand()/double(RAND_MAX);
-    to->sensor[i].point.z = rand()/double(RAND_MAX);
-    to->sensor[i].theta = rand()/double(RAND_MAX);
-    to->sensor[i].phi = rand()/double(RAND_MAX);
-    to->numSensors++;
-  }
+  // print output of location and pose
+  std::cout << "Location (x, y, z): " << tvec << std::endl;
+  std::cout << "Pose (roll, pitch, yaw): " << angles << std::endl;
 }
 
 std::vector<cv::Point2f> GatherImagePoints(TrackedObject *to)
@@ -155,11 +51,6 @@ std::vector<cv::Point2f> GatherImagePoints(TrackedObject *to)
   {
     points.push_back(cv::Point2f(tan(to->sensor[i].phi), tan(to->sensor[i].theta)));
   }
-
-  // for(unsigned int i = 0; i < points.size(); ++i)
-  // {
-  //   std::cout << points[i] << std::endl;
-  // }
 
   return points;
 }
@@ -172,11 +63,48 @@ std::vector<cv::Point3f> GatherObjectPoints(TrackedObject *to)
   for (int i = 0; i < to->numSensors; i++) {
     points.push_back(cv::Point3f(to->sensor[i].point.x, to->sensor[i].point.y, to->sensor[i].point.z));
   }
-
-  // for(unsigned int i = 0; i < points.size(); ++i)
-  // {
-  //   std::cout << points[i] << std::endl;
-  // }
-
+  
   return points;
+}
+
+// Checks if a matrix is a valid rotation matrix.
+bool isRotationMatrix(cv::Mat &R)
+{
+    cv::Mat Rt;
+    transpose(R, Rt);
+    cv::Mat shouldBeIdentity = Rt * R;
+    cv::Mat I = cv::Mat::eye(3,3, shouldBeIdentity.type());
+
+    return  norm(I, shouldBeIdentity) < 1e-6;
+
+}
+
+// Calculates rotation matrix to euler angles
+// The result is the same as MATLAB except the order
+// of the euler angles ( x and z are swapped ).
+std::vector<cv::Point3f> rotationMatrixToEulerAngles(cv::Mat &R)
+{
+    assert(isRotationMatrix(R));
+
+    float sy = sqrt(R.at<double>(0,0) * R.at<double>(0,0) +  R.at<double>(1,0) * R.at<double>(1,0) );
+
+    bool singular = sy < 1e-6; // If
+
+    float x, y, z;
+    if (!singular)
+    {
+        x = atan2(R.at<double>(2,1) , R.at<double>(2,2));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = atan2(R.at<double>(1,0), R.at<double>(0,0));
+    }
+    else
+    {
+        x = atan2(-R.at<double>(1,2), R.at<double>(1,1));
+        y = atan2(-R.at<double>(2,0), sy);
+        z = 0;
+    }
+
+    std::vector<cv::Point3f> angles;
+    angles.push_back(cv::Point3f(x,y,z));
+    return angles;
 }

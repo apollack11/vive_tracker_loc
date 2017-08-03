@@ -38,7 +38,6 @@ typedef struct
 } TrackedObject;
 
 void PoseCalculation(TrackedObject *to);
-void TestFunction(int val);
 
 #ifdef __cplusplus
     }
