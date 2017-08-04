@@ -1,12 +1,6 @@
 CC:=gcc
 CFLAGS:=-Iinclude/libsurvive -I. -fPIC -g -O3 -Iredist -flto -DUSE_DOUBLE -std=gnu99 -rdynamic
-LDFLAGS:=-L/usr/local/lib -lpthread -lz -lm -flto -g
-
-
-LDFLAGS:=$(LDFLAGS) -lX11 -lusb-1.0
-DRAWFUNCTIONS=redist/CNFGFunctions.c redist/CNFGXDriver.c
-GRAPHICS_LOFI:=redist/CNFGFunctions.o redist/CNFGXDriver.o
-
+LDFLAGS:=-L/usr/local/lib -lpthread -lz -lm -flto -g -lX11 -lusb-1.0
 
 POSERS:=src/poser_pollackpnp.o
 REDISTS:=redist/json_helpers.o redist/linmath.o redist/jsmn.o redist/os_generic.o
@@ -17,8 +11,8 @@ LIBSURVIVE_C:=$(LIBSURVIVE_O:.o=.c)
 
 all : calibrate
 
-calibrate :  lib/libsurvive.so calibrate.c redist/os_generic.c $(DRAWFUNCTIONS)
-	$(CC) -o $@ calibrate.c redist/os_generic.c $(DRAWFUNCTIONS) $(LDFLAGS) -L./lib -lsurvive -lposecalc $(CFLAGS) -Wl,-rpath=./lib
+calibrate :  lib/libsurvive.so calibrate.c redist/os_generic.c
+	$(CC) -o $@ calibrate.c redist/os_generic.c $(LDFLAGS) -L./lib -lsurvive -lposecalc $(CFLAGS) -Wl,-rpath=./lib
 
 lib :
 	mkdir lib

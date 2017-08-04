@@ -7,43 +7,13 @@
 #include <string.h>
 #include <os_generic.h>
 #include "src/survive_cal.h"
-#include <CNFGFunctions.h>
+// #include <CNFGFunctions.h>
 #include <linmath.h>
 
 #include "src/survive_config.h"
 
 struct SurviveContext * ctx;
 int  quit = 0;
-
-void HandleKey( int keycode, int bDown )
-{
-	if( !bDown ) return;
-
-	if( keycode == 'O' || keycode == 'o' )
-	{
-		survive_send_magic(ctx,1,0,0);
-	}
-	if( keycode == 'F' || keycode == 'f' )
-	{
-		survive_send_magic(ctx,0,0,0);
-	}
-	if( keycode == 'Q' || keycode == 'q' )
-	{
-		quit = 1;
-	}
-}
-
-void HandleButton( int x, int y, int button, int bDown )
-{
-}
-
-void HandleMotion( int x, int y, int mask )
-{
-}
-
-void HandleDestroy()
-{
-}
 
 int bufferpts[32*2*3][2];
 SurvivePose objPose[2];
@@ -152,8 +122,10 @@ void my_angle_process( struct SurviveObject * so, int sensor_id, int acode, uint
 	survive_default_angle_process( so, sensor_id, acode, timecode, length, angle, lh );
 }
 
+
 char* sensor_name[32];
 
+/*
 void DisplayPose(SurvivePose pose, size_t xResolution, size_t yResolution)
 {
 	const FLT toScale = 2.0 / yResolution; // 2 meters across yResolution pixels
@@ -264,7 +236,8 @@ void DisplayPose(SurvivePose pose, size_t xResolution, size_t yResolution)
 
 
 }
-
+*/
+/*
 void * GuiThread( void * jnk )
 {
 	short screenx, screeny;
@@ -335,7 +308,8 @@ void * GuiThread( void * jnk )
 		OGUSleep( 10000 );
 	}
 }
-
+*/
+/*
 int SurviveThreadLoaded=0;
 
 void * SurviveThread(void *jnk)
@@ -370,24 +344,57 @@ void * SurviveThread(void *jnk)
 	survive_close( ctx );
 	return 0;
 }
-
+*/
 
 int main()
 {
-	// Create the survive thread
-        OGCreateThread( SurviveThread, 0 );
+	/* // Create the survive thread */
+        /* OGCreateThread( SurviveThread, 0 ); */
 
-	// Wait for the survive thread to load
-	while(!SurviveThreadLoaded){ OGUSleep(100); }
+	/* // Wait for the survive thread to load */
+	/* while(!SurviveThreadLoaded){ OGUSleep(100); } */
 
-	// Run the GUI in the main thread
-	// GuiThread(0);
+	/* // Run the GUI in the main thread */
+	/* // GuiThread(0); */
 
-	// Modifying to run on Raspberry Pi (without GUI)
-	while(1) {
-                char caldesc[256];
-                survive_cal_get_status( ctx, caldesc, sizeof( caldesc ) );
+	/* // Modifying to run on Raspberry Pi (without GUI) */
+	/* while(1) { */
+        /*         /\* char caldesc[256]; *\/ */
+        /*         /\* survive_cal_get_status( ctx, caldesc, sizeof( caldesc ) ); *\/ */
+	/* } */
+
+
+	// TEST
+	ctx = survive_init( 0 );
+
+	uint8_t i =0;
+	for (i=0;i<32;++i) {
+		sensor_name[i] = malloc(3);
+		sprintf(sensor_name[i],"%d",i);
 	}
+
+	survive_install_light_fn( ctx,  my_light_process );
+	survive_install_imu_fn( ctx,  my_imu_process );
+	survive_install_angle_fn( ctx, my_angle_process );
+
+	survive_cal_install( ctx );
+
+	if( !ctx )
+	{
+		fprintf( stderr, "Fatal. Could not start\n" );
+		exit( 1 );
+	}
+
+	while(survive_poll(ctx) == 0 && !quit)
+	{
+		//Do stuff.
+	}
+
+	survive_close( ctx );
+	// END TEST
+
+
+
 
 	printf( "Returned\n" );
 	return 0;
