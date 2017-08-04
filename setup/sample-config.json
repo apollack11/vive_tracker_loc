@@ -1,7 +1,10 @@
+"_Comment0":"This file must be named config.json and placed in the same directory as the executable",
+"_Comment1":"In order for the executable to run, both poser values must be set to PoserPollackPnP, RequiredTrackersForCal should be empty, and AllowAllTrackersForCal should be 1",
 "DefaultPoser":"PoserPollackPnP",
 "RequiredTrackersForCal":"",
 "AllowAllTrackersForCal":"1",
-"ConfigPoser":"PoserPollackPnP"
+"ConfigPoser":"PoserPollackPnP",
+"_Comment2":"Everything below this line will be generated automatically when the executable runs"
 "lighthouse0":{
 "index":"0",
 "id":"-1578306019",
