@@ -1,5 +1,6 @@
 calinfo/
 lib/
+build/
 *.o
 *.so
 *~

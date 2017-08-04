@@ -6,10 +6,9 @@
 #include <survive.h>
 #include <string.h>
 #include <os_generic.h>
-#include "src/survive_cal.h"
+#include "survive_cal.h"
 #include <linmath.h>
-
-#include "src/survive_config.h"
+#include "survive_config.h"
 
 struct SurviveContext * ctx;
 int  quit = 0;
