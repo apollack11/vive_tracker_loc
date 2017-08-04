@@ -45,7 +45,6 @@ void HandleDestroy()
 {
 }
 
-//int bufferpts[32*2*3][2];
 int bufferpts[32*2*3][2];
 SurvivePose objPose[2];
 SurvivePose lhPose[2];
@@ -376,7 +375,7 @@ void * SurviveThread(void *jnk)
 int main()
 {
 	// Create the survive thread
-    OGCreateThread( SurviveThread, 0 );
+        OGCreateThread( SurviveThread, 0 );
 
 	// Wait for the survive thread to load
 	while(!SurviveThreadLoaded){ OGUSleep(100); }

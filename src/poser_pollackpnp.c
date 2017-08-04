@@ -22,30 +22,6 @@ typedef struct
 // defining SQUARED as a function
 #define SQUARED(x) ((x)*(x))
 
-// typedef struct
-// {
-// 	FLT x;
-// 	FLT y;
-// 	FLT z;
-// } Point;
-//
-// // used to store info about each sensor
-// typedef struct
-// {
-// 	Point point; // location of the sensor on the tracked object;
-// 	Point normal; // unit vector indicating the normal for the sensor
-// 	double theta; // "horizontal" angular measurement from lighthouse radians
-// 	double phi; // "vertical" angular measurement from lighthouse in radians.
-// 	int id;
-// } TrackedSensor;
-//
-// // used to store info about all the sensors
-// typedef struct
-// {
-// 	size_t numSensors;
-// 	TrackedSensor sensor[0];
-// } TrackedObject;
-
 // used to store pairs of sensors
 // and the angle and distance between them
 typedef struct
@@ -74,11 +50,11 @@ static void QuickPose(SurviveObject *so)
 	// get the poser data from SurviveObject
 	PollackPnPData * ppd = so->PoserData;
 
-	// if (! so->ctx->bsd[0].OOTXSet)
-	// {
-	// 	// we don't know where we are!  Augh!!!
-	// 	return;
-	// }
+	// only start polling for angles after receiving the first full packet
+	if (! so->ctx->bsd[0].OOTXSet)
+	{
+		return;
+	}
 
 	TrackedObject * to;
 
@@ -104,10 +80,6 @@ static void QuickPose(SurviveObject *so)
 			// get the normal vector and x,y,z location of current sensor
 			FLT norm[3] = { so->sensor_normals[i * 3 + 0] , so->sensor_normals[i * 3 + 1] , so->sensor_normals[i * 3 + 2] };
 			FLT point[3] = { so->sensor_locations[i * 3 + 0] , so->sensor_locations[i * 3 + 1] , so->sensor_locations[i * 3 + 2] };
-
-			// TODO: remove these two lines!!!
-			//quatrotatevector(norm, downQuat, norm);
-			//quatrotatevector(point, downQuat, point);
 
 			// store normal vector and location in TrackedObject
 			// each sensor that sees something has information stored
