@@ -369,7 +369,7 @@ int main()
 
 	uint8_t i =0;
 	for (i=0;i<32;++i) {
-		sensor_name[i] = malloc(3);
+	        sensor_name[i] = (char*)malloc(3);
 		sprintf(sensor_name[i],"%d",i);
 	}
 
