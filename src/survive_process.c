@@ -46,7 +46,7 @@ void survive_default_angle_process( SurviveObject * so, int sensor_id, int acode
 	SurviveContext * ctx = so->ctx;
 	if( ctx->calptr )
 	{
-		survive_cal_angle( so, sensor_id, acode, timecode, length, angle, lh );
+		/* survive_cal_angle( so, sensor_id, acode, timecode, length, angle, lh ); */
 	}
 	if( so->PoserFn )
 	{

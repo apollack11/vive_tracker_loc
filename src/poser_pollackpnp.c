@@ -101,13 +101,34 @@ static void QuickPose(SurviveObject *so)
 	to->numSensors = sensorCount;
 
 	// good to check number of sensors being seen
-	printf("sensorCount: %zd\n", to->numSensors);
+	/* printf("sensorCount: %zd\n", to->numSensors); */
 
+	Pose *pose;
+	pose = malloc(sizeof(Pose));
 	if (sensorCount > 4)
 	{
-		PoseCalculation(to);
-	}
+	  PoseCalculation(to, pose);
+	  
+	  // Store tracked object pose in SurviveObject
+      	  so->FromLHPose[0].Pos[0] = pose->Pos[0];
+	  so->FromLHPose[0].Pos[1] = pose->Pos[1];
+	  so->FromLHPose[0].Pos[2] = pose->Pos[2];
 
+	  FLT quat[4];
+	  FLT matrix44[16];
+
+	  for (int i = 0; i < 16; i++)
+	  {
+	    matrix44[i] = pose->SE3Mat[i];
+	  }
+	  quatfrommatrix(quat, matrix44);
+
+	  so->FromLHPose[0].Rot[0] = quat[1];
+	  so->FromLHPose[0].Rot[1] = quat[2];
+	  so->FromLHPose[0].Rot[2] = quat[3];
+	  so->FromLHPose[0].Rot[3] = quat[0];
+	}
+	
 	free(to);
 }
 

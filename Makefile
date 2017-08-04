@@ -18,7 +18,7 @@ lib :
 	mkdir $@
 
 lib/libposecalc.so : lib src/opencv_pose_calc.cpp
-	g++ -o $@ src/opencv_pose_calc.cpp -Iinclude/libposecalc `pkg-config opencv --cflags --libs` -shared -fPIC
+	g++ -o $@ src/opencv_pose_calc.cpp -Iinclude/libsurvive -Iinclude/libposecalc `pkg-config opencv --cflags --libs` -shared -fPIC
 
 lib/libsurvive.so : lib/libposecalc.so $(LIBSURVIVE_O)
 	g++ -o $@ $(LIBSURVIVE_O) $(LDFLAGS) -L./lib -lposecalc -shared 

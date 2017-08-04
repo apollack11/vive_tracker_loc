@@ -15,6 +15,12 @@ extern "C" {
 
 typedef struct
 {
+        float Pos[3];
+        float SE3Mat[16];
+} Pose;
+
+typedef struct
+{
 	float x;
 	float y;
 	float z;
@@ -37,7 +43,7 @@ typedef struct
 	TrackedSensor sensor[0];
 } TrackedObject;
 
-void PoseCalculation(TrackedObject *to);
+void PoseCalculation(TrackedObject *to, Pose *pose);
 
 #ifdef __cplusplus
     }
