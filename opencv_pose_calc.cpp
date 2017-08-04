@@ -29,7 +29,7 @@ void PoseCalculation(TrackedObject *to)
   cv::Mat tvec(3,1,cv::DataType<double>::type);
 
   // solvePnP
-  cv::solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec);
+  cv::solvePnP(objectPoints, imagePoints, cameraMatrix, distCoeffs, rvec, tvec, false, CV_EPNP);
 
   // convert rvec to roation matrix
   cv::Mat R(3, 1, cv::DataType<double>::type);
