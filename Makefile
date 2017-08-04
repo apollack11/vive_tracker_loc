@@ -9,10 +9,10 @@ LIBSURVIVE_CORE:=src/survive.o src/survive_data.o src/survive_process.o src/ootx
 LIBSURVIVE_O:=$(POSERS) $(REDISTS) $(LIBSURVIVE_CORE)
 LIBSURVIVE_C:=$(LIBSURVIVE_O:.o=.c)
 
-all : calibrate
+all : runposer
 
-calibrate :  lib/libsurvive.so calibrate.c redist/os_generic.c
-	g++ -o $@ calibrate.c redist/os_generic.c $(LDFLAGS) -L./lib -lsurvive -lposecalc $(BASEFLAGS) -Wl,-rpath=./lib
+runposer :  lib/libsurvive.so src/runposer.c redist/os_generic.c
+	g++ -o $@ src/runposer.c redist/os_generic.c $(LDFLAGS) -L./lib -lsurvive -lposecalc $(BASEFLAGS) -Wl,-rpath=./lib
 
 lib :
 	mkdir lib
@@ -24,7 +24,7 @@ lib/libsurvive.so : lib/libposecalc.so $(LIBSURVIVE_O)
 	g++ -o $@ $(LIBSURVIVE_O) $(LDFLAGS) -L./lib -lposecalc -shared 
 
 clean :
-	rm -rf *.o src/*.o *~ src/*~ calibrate lib/* redist/*.o redist/*~ 
+	rm -rf *.o src/*.o *~ src/*~ runposer lib/* redist/*.o redist/*~ 
 
 .PHONY:
 	all clean
