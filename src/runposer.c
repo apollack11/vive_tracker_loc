@@ -7,7 +7,6 @@
 #include <string.h>
 #include <os_generic.h>
 #include "src/survive_cal.h"
-// #include <CNFGFunctions.h>
 #include <linmath.h>
 
 #include "src/survive_config.h"
