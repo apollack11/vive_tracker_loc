@@ -1,5 +1,3 @@
-calinfo/
 lib/
 *.o
 *.so
-*~
