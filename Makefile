@@ -11,14 +11,14 @@ LIBSURVIVE_C:=$(LIBSURVIVE_O:.o=.c)
 
 all : runposer
 
-runposer :  lib/libsurvive.so src/runposer.c redist/os_generic.c
+runposer : lib/libsurvive.so src/runposer.c redist/os_generic.c
 	g++ -o $@ src/runposer.c redist/os_generic.c $(LDFLAGS) -L./lib -lsurvive -lposecalc $(BASEFLAGS) -Wl,-rpath=./lib
 
 lib :
-	mkdir lib
+	mkdir $@
 
-lib/libposecalc.so : src/opencv_pose_calc.cpp
-	g++ -o $@ $^ -Iinclude/libposecalc `pkg-config opencv --cflags --libs` -shared -fPIC
+lib/libposecalc.so : lib src/opencv_pose_calc.cpp
+	g++ -o $@ src/opencv_pose_calc.cpp -Iinclude/libposecalc `pkg-config opencv --cflags --libs` -shared -fPIC
 
 lib/libsurvive.so : lib/libposecalc.so $(LIBSURVIVE_O)
 	g++ -o $@ $(LIBSURVIVE_O) $(LDFLAGS) -L./lib -lposecalc -shared 
