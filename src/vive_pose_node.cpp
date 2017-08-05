@@ -6,9 +6,12 @@
 #include <survive_cal.h>
 #include <linmath.h>
 #include <survive_config.h>
+#include <ros/ros.h>
+#include <tf/transform_broadcaster.h>
 
 struct SurviveContext * ctx;
-int  quit = 0;
+int quit = 0;
+int timestamp = 0;
 
 int bufferpts[32*2*3][2];
 SurvivePose objPose[2];
@@ -32,6 +35,7 @@ void my_angle_process( struct SurviveObject * so, int sensor_id, int acode, uint
 		objPose[0].Rot[2] = so->FromLHPose[0].Rot[2];
 		objPose[0].Rot[3] = so->FromLHPose[0].Rot[3];
 		
+		timestamp = timecode;
 		if (!PoseLoaded)
 		{
 		  PoseLoaded = 1;
@@ -62,7 +66,7 @@ int main()
 	{
 	        if (PoseLoaded)
 	        {
-	                printf("Current position: (%f, %f, %f)\n", objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]);
+		  printf("%d : (%f, %f, %f)\n", timestamp, objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]);
 	        }
        	}
 
@@ -71,5 +75,3 @@ int main()
 	printf("Exiting main.\n");
 	return 0;
 }
-
-

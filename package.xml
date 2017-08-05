@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package>
+  <name>vive_tracker_loc</name>
+  <version>0.0.1</version>
+  <description>The vive_tracker_loc package</description>
+  <author>Adam Pollack</author>
+  <author email="apollack11@gmail.com">Adam Pollack</author>
+  
+  <license>BSD</license>
+  <url type="repository">https://github.com/apollack11/vive_tracker_loc</url>
+  <maintainer email="apollack11@gmail.com">Adam Pollack</maintainer>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>  
+  <build_depend>tf</build_depend>
+  
+</package>

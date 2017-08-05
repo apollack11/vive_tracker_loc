@@ -99,7 +99,6 @@ SurviveContext * survive_init( int headless )
 		SV_ERROR( "Error.  Cannot find any valid poser." );
 	}
 
-	printf("Objects Count: %d\n", ctx->objs_ct);
 	for( i = 0; i < ctx->objs_ct; i++ )
 	{
 		ctx->objs[i]->PoserFn = PreferredPoserCB;
