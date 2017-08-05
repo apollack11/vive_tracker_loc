@@ -12,6 +12,7 @@
 struct SurviveContext * ctx;
 int quit = 0;
 int timestamp = 0;
+int timestampprev = 0;
 
 int bufferpts[32*2*3][2];
 SurvivePose objPose[2];
@@ -24,54 +25,64 @@ int PoseLoaded = 0;
 
 void my_angle_process( struct SurviveObject * so, int sensor_id, int acode, uint32_t timecode, FLT length, FLT angle, uint32_t lh)
 {
-	if (so == so->ctx->objs[0] && so->FromLHPose[0].Pos[0] != 0)
-	{
-		objPose[0].Pos[0] = so->FromLHPose[0].Pos[0];
-		objPose[0].Pos[1] = so->FromLHPose[0].Pos[1];
-		objPose[0].Pos[2] = so->FromLHPose[0].Pos[2];
+  if (so == so->ctx->objs[0] && so->FromLHPose[0].Pos[0] != 0)
+    {
+      objPose[0].Pos[0] = so->FromLHPose[0].Pos[0];
+      objPose[0].Pos[1] = so->FromLHPose[0].Pos[1];
+      objPose[0].Pos[2] = so->FromLHPose[0].Pos[2];
 
-		objPose[0].Rot[0] = so->FromLHPose[0].Rot[0];
-		objPose[0].Rot[1] = so->FromLHPose[0].Rot[1];
-		objPose[0].Rot[2] = so->FromLHPose[0].Rot[2];
-		objPose[0].Rot[3] = so->FromLHPose[0].Rot[3];
+      objPose[0].Rot[0] = so->FromLHPose[0].Rot[0];
+      objPose[0].Rot[1] = so->FromLHPose[0].Rot[1];
+      objPose[0].Rot[2] = so->FromLHPose[0].Rot[2];
+      objPose[0].Rot[3] = so->FromLHPose[0].Rot[3];
 		
-		timestamp = timecode;
-		if (!PoseLoaded)
-		{
-		  PoseLoaded = 1;
-		  printf("Loaded Pose Data\n");
-		}
+      timestamp = timecode;
+      if (!PoseLoaded)
+	{
+	  PoseLoaded = 1;
+	  printf("Loaded Pose Data\n");
 	}
-	survive_default_angle_process( so, sensor_id, acode, timecode, length, angle, lh );
+    }
+
+  survive_default_angle_process( so, sensor_id, acode, timecode, length, angle, lh );
 }
 
-int main()
+int main(int argc, char** argv)
 {
-	ctx = survive_init( 0 );
+  ros::init(argc, argv, "vive_pose_broadcaster");
 
-	// this is where the poser is called
-	survive_install_angle_fn( ctx, my_angle_process );
+  ctx = survive_init( 0 );
 
-	survive_cal_install( ctx );
+  // this is where the poser is called
+  survive_install_angle_fn( ctx, my_angle_process );
 
-	if( !ctx )
-	{
-		fprintf( stderr, "Fatal. Could not start\n" );
-		exit( 1 );
-	}
+  survive_cal_install( ctx );
 
-	// Put main code here
-	// Full pose (Pos[3] and Quat[4]) will be available in objPose[0]
-	while(survive_poll(ctx) == 0 && !quit)
-	{
-	        if (PoseLoaded)
-	        {
-		  printf("%d : (%f, %f, %f)\n", timestamp, objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]);
-	        }
-       	}
+  if( !ctx )
+    {
+      fprintf( stderr, "Fatal. Could not start\n" );
+      exit( 1 );
+    }
 
-	survive_close( ctx );
+  // Put main code here
+  // Full pose (Pos[3] and Quat[4]) will be available in objPose[0]
+  while(survive_poll(ctx) == 0 && !quit)
+    {
+      if (PoseLoaded && (timestamp != timestampprev))
+        {
+	  static tf::TransformBroadcaster br;
+	  tf::Transform transform;
+	  transform.setOrigin(tf::Vector3(objPose[0].Pos[0], objPose[0].Pos[1], -objPose[0].Pos[2]));
+	  tf::Quaternion q = tf::Quaternion(objPose[0].Rot[0], objPose[0].Rot[1], objPose[0].Rot[2], objPose[0].Rot[3]);
+	  transform.setRotation(q);
+	  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "lighthouse", "tracker"));
+	  // printf("%d -- %d : (%f, %f, %f)\n", timestampprev, timestamp, objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]);
+        }
+      timestampprev = timestamp;
+    }
 
-	printf("Exiting main.\n");
-	return 0;
+  survive_close( ctx );
+
+  printf("Exiting main.\n");
+  return 0;
 }
