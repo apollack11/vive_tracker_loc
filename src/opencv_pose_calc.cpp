@@ -35,9 +35,9 @@ void PoseCalculation(TrackedObject *to, Pose *pose)
   cv::Mat R(3, 1, cv::DataType<double>::type);
   cv::Rodrigues(rvec, R);
 
-  pose->Pos[0] = tvec.at<double>(0,0);
-  pose->Pos[1] = tvec.at<double>(1,0);
-  pose->Pos[2] = tvec.at<double>(1,1);
+  pose->Pos[0] = -tvec.at<double>(1,0);
+  pose->Pos[1] = tvec.at<double>(0,0);
+  pose->Pos[2] = -tvec.at<double>(1,1);
 
   // std::cout << "tvec: " << tvec << std::endl;
   // std::cout << "Rotation Matrix: " << R << std::endl;
@@ -45,15 +45,15 @@ void PoseCalculation(TrackedObject *to, Pose *pose)
   pose->SE3Mat[0] = R.at<double>(0,0);
   pose->SE3Mat[1] = R.at<double>(0,1);
   pose->SE3Mat[2] = R.at<double>(0,2);
-  pose->SE3Mat[3] = tvec.at<double>(0,0);
+  pose->SE3Mat[3] = pose->Pos[0];
   pose->SE3Mat[4] = R.at<double>(1,0);
   pose->SE3Mat[5] = R.at<double>(1,1);
   pose->SE3Mat[6] = R.at<double>(1,2);
-  pose->SE3Mat[7] = tvec.at<double>(1,0);
+  pose->SE3Mat[7] = pose->Pos[1];
   pose->SE3Mat[8] = R.at<double>(2,0);
   pose->SE3Mat[9] = R.at<double>(2,1);
   pose->SE3Mat[10] = R.at<double>(2,2);
-  pose->SE3Mat[11] = tvec.at<double>(1,1);
+  pose->SE3Mat[11] = pose->Pos[2];
   pose->SE3Mat[12] = 0;
   pose->SE3Mat[13] = 0;
   pose->SE3Mat[14] = 0;

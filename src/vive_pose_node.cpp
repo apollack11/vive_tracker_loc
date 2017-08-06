@@ -72,7 +72,7 @@ int main(int argc, char** argv)
         {
 	  static tf::TransformBroadcaster br;
 	  tf::Transform transform;
-	  transform.setOrigin(tf::Vector3(objPose[0].Pos[0], objPose[0].Pos[1], -objPose[0].Pos[2]));
+	  transform.setOrigin(tf::Vector3(objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]));
 	  tf::Quaternion q = tf::Quaternion(objPose[0].Rot[0], objPose[0].Rot[1], objPose[0].Rot[2], objPose[0].Rot[3]);
 	  transform.setRotation(q);
 	  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "lighthouse", "tracker"));
