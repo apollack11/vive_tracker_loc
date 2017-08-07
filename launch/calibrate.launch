@@ -11,7 +11,7 @@
 	args="-d $(find vive_tracker_loc)/launch/tracker_demo_config.rviz"/>
 
   <!-- start the point republishing node -->
-  <!-- <node pkg="vive_tracker_loc" name="point_publisher" type="point_publisher.py" -->
-  <!-- 	respawn="true" output="screen"/> -->
+  <node pkg="vive_tracker_loc" name="point_publisher" type="point_publisher.py"
+  	respawn="true" output="screen"/>
 
 </launch>
