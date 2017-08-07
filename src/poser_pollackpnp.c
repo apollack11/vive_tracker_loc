@@ -158,9 +158,9 @@ static void QuickPose(SurviveObject *so)
 
 	  quatfrommatrix(quat, matrix44);
 
-	  so->FromLHPose[0].Rot[0] = quat[3];
-	  so->FromLHPose[0].Rot[1] = quat[1];
-	  so->FromLHPose[0].Rot[2] = quat[2];
+	  so->FromLHPose[0].Rot[0] = quat[1];
+	  so->FromLHPose[0].Rot[1] = quat[2];
+	  so->FromLHPose[0].Rot[2] = quat[3];
 	  so->FromLHPose[0].Rot[3] = quat[0];
 	}
 	
@@ -182,7 +182,13 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 	case POSERDATA_IMU:
 	{
 		PoserDataIMU * imu = (PoserDataIMU*)pd;
-		//printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] );
+		/* printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] ); */
+		so->ImuData.Accel[0] = imu->accel[0];
+		so->ImuData.Accel[1] = imu->accel[1];
+		so->ImuData.Accel[2] = imu->accel[2];
+		so->ImuData.Gyro[0] = imu->gyro[0];
+		so->ImuData.Gyro[1] = imu->gyro[1];
+		so->ImuData.Gyro[2] = imu->gyro[2];
 		break;
 	}
 	case POSERDATA_LIGHT:
@@ -197,15 +203,7 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 			// only once per full cycle
 			if (0 == l->lh && axis)
 			{
-				static unsigned int counter = 1;
-
-				counter++;
-
-				if (counter % 4 == 0)
-				{
-					// MAIN CALCULATIONS
-					QuickPose(so);
-				}
+				QuickPose(so);
 			}
 
 			// axis changed, time to increment the circular buffer index.

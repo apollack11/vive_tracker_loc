@@ -39,9 +39,9 @@ void PoseCalculation(TrackedObject *to, Pose *pose)
   // pose->Pos[1] = tvec.at<double>(0,0);
   // pose->Pos[2] = -tvec.at<double>(1,1);
 
-  pose->Pos[0] = -tvec.at<double>(1,1);
-  pose->Pos[1] = tvec.at<double>(0,0);
-  pose->Pos[2] = tvec.at<double>(1,0);
+  pose->Pos[0] = tvec.at<double>(0,0);
+  pose->Pos[1] = tvec.at<double>(1,0);
+  pose->Pos[2] = -tvec.at<double>(1,1);
 
   // std::cout << "tvec: " << tvec << std::endl;
   // std::cout << "Rotation Matrix: " << R << std::endl;

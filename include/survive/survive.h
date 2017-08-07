@@ -35,6 +35,8 @@ struct SurviveObject
 	void * PoserData;   //Initialized to zero, configured by poser, can be anything the poser wants.
 	PoserCB PoserFn;
 
+        SurviveImu ImuData;
+  
 	//Device-specific information about the location of the sensors.  This data will be used by the poser.
 	int8_t nr_locations; // sensor count
 	FLT * sensor_locations; // size is nr_locations*3.  Contains x,y,z values for each sensor
