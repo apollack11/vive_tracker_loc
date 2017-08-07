@@ -30,6 +30,5 @@ if __name__ == "__main__":
     rotBL = t.quaternion_from_matrix(matBL)
 
     while not rospy.is_shutdown():
-        # br.sendTransform((2.0, 0, 2.0), (0.0, 0.0, 0.0, 1.0), rospy.Time.now(), "lighthouse", "base")
         br.sendTransform(transBL, rotBL, rospy.Time.now(), "lighthouse", "base")
         rate.sleep()

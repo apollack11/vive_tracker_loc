@@ -16,6 +16,7 @@ int timestampprev = 0;
 
 int bufferpts[32*2*3][2];
 SurvivePose objPose[2];
+SurvivePose prevPose[2];
 SurvivePose lhPose[2];
 
 char buffermts[32*128*3];
@@ -39,6 +40,13 @@ void my_angle_process( struct SurviveObject * so, int sensor_id, int acode, uint
       timestamp = timecode;
       if (!PoseLoaded)
 	{
+	  prevPose[0].Pos[0] = objPose[0].Pos[0];
+	  prevPose[0].Pos[1] = objPose[0].Pos[1];
+	  prevPose[0].Pos[2] = objPose[0].Pos[2];
+	  prevPose[0].Rot[0] = objPose[0].Rot[0];
+	  prevPose[0].Rot[1] = objPose[0].Rot[1];
+	  prevPose[0].Rot[2] = objPose[0].Rot[2];
+	  prevPose[0].Rot[3] = objPose[0].Rot[3];
 	  PoseLoaded = 1;
 	  printf("Loaded Pose Data\n");
 	}
@@ -72,13 +80,29 @@ int main(int argc, char** argv)
         {
 	  static tf::TransformBroadcaster br;
 	  tf::Transform transform;
-	  transform.setOrigin(tf::Vector3(objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]));
-	  tf::Quaternion q = tf::Quaternion(objPose[0].Rot[0], objPose[0].Rot[1], objPose[0].Rot[2], objPose[0].Rot[3]);
-	  transform.setRotation(q);
+	  if (abs(prevPose[0].Pos[0] - objPose[0].Pos[0]) > 0.2 || abs(prevPose[0].Pos[0] - objPose[0].Pos[0]) > 0.2 || abs(prevPose[0].Pos[0] - objPose[0].Pos[0]) > 0.2) 
+	  {
+	    transform.setOrigin(tf::Vector3(prevPose[0].Pos[0], prevPose[0].Pos[1], prevPose[0].Pos[2]));
+	    tf::Quaternion q = tf::Quaternion(prevPose[0].Rot[0], prevPose[0].Rot[1], prevPose[0].Rot[2], prevPose[0].Rot[3]);
+	    transform.setRotation(q);
+	  }
+	  else 
+	  {
+	    transform.setOrigin(tf::Vector3(objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]));
+	    tf::Quaternion q = tf::Quaternion(objPose[0].Rot[0], objPose[0].Rot[1], objPose[0].Rot[2], objPose[0].Rot[3]);
+	    transform.setRotation(q);
+	  }
 	  br.sendTransform(tf::StampedTransform(transform, ros::Time::now(), "lighthouse", "tracker"));
 	  // printf("%d -- %d : (%f, %f, %f)\n", timestampprev, timestamp, objPose[0].Pos[0], objPose[0].Pos[1], objPose[0].Pos[2]);
         }
       timestampprev = timestamp;
+      prevPose[0].Pos[0] = objPose[0].Pos[0];
+      prevPose[0].Pos[1] = objPose[0].Pos[1];
+      prevPose[0].Pos[2] = objPose[0].Pos[2];
+      prevPose[0].Rot[0] = objPose[0].Rot[0];
+      prevPose[0].Rot[1] = objPose[0].Rot[1];
+      prevPose[0].Rot[2] = objPose[0].Rot[2];
+      prevPose[0].Rot[3] = objPose[0].Rot[3];
     }
 
   survive_close( ctx );
