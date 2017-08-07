@@ -72,9 +72,9 @@ void ootx_packet_clbk_d(ootx_decoder_context *ct, ootx_packet* packet)
 	config_set_lighthouse(ctx->lh_config,b,id);
 	lighthouses_completed++;
 
-	if (lighthouses_completed >= NUM_LIGHTHOUSES) {
-		config_save(ctx, "config.json");
-	}
+	/* if (lighthouses_completed >= NUM_LIGHTHOUSES) { */
+	/* 	config_save(ctx, "config.json"); */
+	/* } */
 }
 
 int survive_cal_get_status( struct SurviveContext * ctx, char * description, int description_length )
@@ -124,8 +124,8 @@ void survive_cal_install( struct SurviveContext * ctx )
 
 	cd->numPoseObjects = 0;
 
-	const char * RequiredTrackersForCal = config_read_str( ctx->global_config_values, "RequiredTrackersForCal", "HMD,WM0,WM1" );
-	const uint32_t AllowAllTrackersForCal = config_read_uint32( ctx->global_config_values, "AllowAllTrackersForCal", 0 );
+	const char * RequiredTrackersForCal = config_read_str( ctx->global_config_values, "RequiredTrackersForCal", "" );
+	const uint32_t AllowAllTrackersForCal = config_read_uint32( ctx->global_config_values, "AllowAllTrackersForCal", 1 );
 	size_t requiredTrackersFound = 0;
 
 	for (int j=0; j < ctx->objs_ct; j++)
