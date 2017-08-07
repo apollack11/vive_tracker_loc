@@ -162,15 +162,7 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 			// only once per full cycle
 			if (0 == l->lh && axis)
 			{
-				static unsigned int counter = 1;
-
-				counter++;
-
-				if (counter % 4 == 0)
-				{
-					// MAIN CALCULATIONS
-					QuickPose(so);
-				}
+				QuickPose(so);
 			}
 
 			// axis changed, time to increment the circular buffer index.
