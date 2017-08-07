@@ -664,7 +664,7 @@ void survive_vive_usb_close( SurviveViveData * sv )
 		OGJoinThread( sv->servicethread[i] );
 	}
 	//This is global, don't do it on account of other tasks.
-	//hid_exit();
+	hid_exit();
 
 #else
 	for( i = 0; i < MAX_USB_DEVS; i++ )
@@ -745,6 +745,9 @@ int survive_get_config( char ** config, SurviveViveData * sv, int devno, int ifa
 	if( ( ret = hid_get_feature_report_timeout( dev, iface, cfgbuff, sizeof( cfgbuff ) ) ) < 0 )
 	{
 		SV_INFO( "Could not get survive config data for device %d:%d", devno, iface );
+		/* survive_vive_usb_close(sv); */
+		/* const wchar_t* errormsg = hid_error(dev); */
+		/* printf("%s\n", errormsg); */
 		return -1;
 	}
 
