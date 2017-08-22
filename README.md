@@ -1,4 +1,4 @@
-# HTC Vive Localization Project
+# HTC Vive Tracker Localization Project
 by Adam Pollack
 
 The goal of this project is the use HTC Lighthouses to determine the location of an HTC Vive Tracker using only a Raspberry Pi and software. The final executable prints the pose of the tracker relative to one lighthouse.
