@@ -15,6 +15,9 @@ typedef struct
 	FLT oldAngles[SENSORS_PER_OBJECT][2][NUM_LIGHTHOUSES][OLD_ANGLES_BUFF_LEN]; // sensor, sweep axis, lighthouse, instance
 	int angleIndex[NUM_LIGHTHOUSES][2]; // index into circular buffer ahead. separate index for each axis.
 	int lastAxis[NUM_LIGHTHOUSES];
+  // IMU STUFF:
+  FLT acc[3];
+  FLT gyro[3];
 } PollackPnPData;
 
 #define MAX_POINT_PAIRS 100
@@ -147,7 +150,9 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 	case POSERDATA_IMU:
 	{
 		PoserDataIMU * imu = (PoserDataIMU*)pd;
-		//printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] );
+		ppd->acc[0] = imu->accel[0];
+		ppd->acc[1] = imu->accel[1];
+		ppd->acc[2] = imu->accel[2];
 		break;
 	}
 	case POSERDATA_LIGHT:
@@ -162,15 +167,8 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 			// only once per full cycle
 			if (0 == l->lh && axis)
 			{
-				static unsigned int counter = 1;
-
-				counter++;
-
-				if (counter % 4 == 0)
-				{
-					// MAIN CALCULATIONS
-					QuickPose(so);
-				}
+			  // MAIN CALCULATIONS
+			  QuickPose(so);
 			}
 
 			// axis changed, time to increment the circular buffer index.
