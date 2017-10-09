@@ -664,7 +664,7 @@ void survive_vive_usb_close( SurviveViveData * sv )
 		OGJoinThread( sv->servicethread[i] );
 	}
 	//This is global, don't do it on account of other tasks.
-	//hid_exit();
+	hid_exit();
 
 #else
 	for( i = 0; i < MAX_USB_DEVS; i++ )

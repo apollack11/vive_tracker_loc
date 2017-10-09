@@ -37,6 +37,21 @@ typedef struct
 	char bi;
 } PointsAndAngle;
 
+// multiply 2 matrices in 1D arrays
+void multiplyMatrices(float* matA, int rA, int cA, float* matB, int rB, int cB, float* matC, int rC, int cC)
+{
+    for (int i = 0; i < rA; i++)
+    {
+        for (int j = 0; j < cB; j++)
+	{
+            float sum = 0.0;
+            for (int k = 0; k < rB; k++)
+                sum = sum + matA[i * cA + k] * matB[k * cB + j];
+            matC[i * cC + j] = sum;
+        }
+    }
+}
+
 // calculate distance between two points
 // used for to calculate distance between sensors
 static FLT distance(Point a, Point b)
@@ -111,7 +126,7 @@ static void QuickPose(SurviveObject *so)
 	if (sensorCount > 4)
 	{
 	  PoseCalculation(to, pose);
-	  
+
 	  // Store tracked object pose in SurviveObject
       	  so->FromLHPose[0].Pos[0] = pose->Pos[0];
 	  so->FromLHPose[0].Pos[1] = pose->Pos[1];
@@ -124,6 +139,26 @@ static void QuickPose(SurviveObject *so)
 	  {
 	    matrix44[i] = pose->SE3Mat[i];
 	  }
+	  FLT rot90[16];
+	  for (int i = 0; i < 16; i++)
+	  {
+	    rot90[i] = 0;
+	  }
+	  rot90[0] = 1;
+	  rot90[6] = -1;
+	  rot90[9] = 1;
+
+	  FLT newMat[16];
+
+	  multiplyMatrices(matrix44, 4, 4, rot90, 4, 4, newMat, 4, 4);
+
+	  /* matrix44[0]*rot90[0] + matrix44[1]*rot90[4] + matrix44[2]*rot90[8] + matrix44[3]*rot90[12] */
+	  /* matrix44[0]*rot90[1] + matrix44[1]*rot90[5] + matrix44[2]*rot90[9] + matrix44[3]*rot90[13] */
+	  /* matrix44[0]*rot90[2] + matrix44[1]*rot90[6] + matrix44[2]*rot90[10] + matrix44[3]*rot90[14] */
+	  /* matrix44[0]*rot90[3] + matrix44[1]*rot90[7] + matrix44[2]*rot90[11] + matrix44[3]*rot90[15] */
+
+	  /* matrix44[4]*rot90[0] + matrix44[5]*rot90[4] + matrixx44[6]*rot90[8] + matrix44[7]*rot90[12] */
+
 	  quatfrommatrix(quat, matrix44);
 
 	  so->FromLHPose[0].Rot[0] = quat[1];
@@ -131,7 +166,7 @@ static void QuickPose(SurviveObject *so)
 	  so->FromLHPose[0].Rot[2] = quat[3];
 	  so->FromLHPose[0].Rot[3] = quat[0];
 	}
-	
+
 	free(to);
 }
 
@@ -150,9 +185,13 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 	case POSERDATA_IMU:
 	{
 		PoserDataIMU * imu = (PoserDataIMU*)pd;
-		ppd->acc[0] = imu->accel[0];
-		ppd->acc[1] = imu->accel[1];
-		ppd->acc[2] = imu->accel[2];
+		/* printf( "IMU:%s (%f %f %f) (%f %f %f)\n", so->codename, imu->accel[0], imu->accel[1], imu->accel[2], imu->gyro[0], imu->gyro[1], imu->gyro[2] ); */
+		so->ImuData.Accel[0] = imu->accel[0];
+		so->ImuData.Accel[1] = imu->accel[1];
+		so->ImuData.Accel[2] = imu->accel[2];
+		so->ImuData.Gyro[0] = imu->gyro[0];
+		so->ImuData.Gyro[1] = imu->gyro[1];
+		so->ImuData.Gyro[2] = imu->gyro[2];
 		break;
 	}
 	case POSERDATA_LIGHT:
@@ -167,8 +206,7 @@ int PoserPollackPnP( SurviveObject * so, PoserData * pd )
 			// only once per full cycle
 			if (0 == l->lh && axis)
 			{
-			  // MAIN CALCULATIONS
-			  QuickPose(so);
+				QuickPose(so);
 			}
 
 			// axis changed, time to increment the circular buffer index.

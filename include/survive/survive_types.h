@@ -20,9 +20,15 @@ typedef struct SurvivePose
 	FLT  Rot[4];
 } SurvivePose;
 
+typedef struct SurviveImu
+{
+    FLT Accel[3];
+    FLT Gyro[3];
+} SurviveImu;
+
 //Careful with this, you can't just add another one right now, would take minor changes in survive_data.c and the cal tools.
 //It will also require a recompile.  TODO: revisit this and correct the comment once fixed.
-#define NUM_LIGHTHOUSES 2  
+#define NUM_LIGHTHOUSES 2
 
 #define INTBUFFSIZE			64
 #define SENSORS_PER_OBJECT	32
