@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include <math.h>
 #include <dclapack.h>
-#include "opencv_pose_calc.h"
+#include "poser_pollackpnp.h"
 
 // QUESTION: what do I still need from this?
 typedef struct
@@ -128,7 +128,7 @@ static void QuickPose(SurviveObject *so)
 	  PoseCalculation(to, pose);
 
 	  // Store tracked object pose in SurviveObject
-      	  so->FromLHPose[0].Pos[0] = pose->Pos[0];
+	  so->FromLHPose[0].Pos[0] = pose->Pos[0];
 	  so->FromLHPose[0].Pos[1] = pose->Pos[1];
 	  so->FromLHPose[0].Pos[2] = pose->Pos[2];
 

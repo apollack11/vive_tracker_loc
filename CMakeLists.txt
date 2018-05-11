@@ -19,7 +19,8 @@ include_directories(include
   include/survive
   include/posecalc
   ${OpenCV_INCLUDE_DIRS}
-  ${LIBUSB1_INCLUDE_DIRS})
+  ${LIBUSB1_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS})
 
 ###################################
 ## catkin specific configuration ##
